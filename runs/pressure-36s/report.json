@@ -1,0 +1,58 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "started_at": "2026-09-14T04:43:19",
+ "status": "no_candidate",
+ "gates": {},
+ "events": [
+  {
+   "t": 30.12,
+   "event": "analyse",
+   "traps": 0
+  },
+  {
+   "t": 30.12,
+   "event": "wave",
+   "candidates": 0,
+   "oracle": false
+  }
+ ],
+ "analysis": {
+  "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+  "language": "python",
+  "entrypoint": "simulate_writes",
+  "summary": "(analysis unavailable: analyse:1ba0d34f timed out after 30.0s)",
+  "traps": [],
+  "input_shape": "",
+  "output_shape": "",
+  "invariants": [],
+  "max_scale": ""
+ },
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 0.12,
+  "total_s": 36.0,
+  "elapsed_s": 30.125,
+  "remaining_s": 5.875,
+  "emit_reserve_s": 5.4,
+  "phases": {
+   "analyse": {
+    "allocated_s": 2.142,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 8.262,
+    "elapsed_s": 30.093
+   },
+   "verify": {
+    "allocated_s": 14.688,
+    "elapsed_s": 0.0
+   },
+   "adjudicate": {
+    "allocated_s": 5.508,
+    "elapsed_s": 0.0
+   }
+  }
+ }
+}

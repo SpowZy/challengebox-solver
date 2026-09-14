@@ -1,0 +1,52 @@
+{
+ "problem_id": "5cb294c18288f6ea4e50d59fd9831610232b6df28cc1a84b7d23e3d1eb5c7bb1",
+ "language": "python",
+ "entrypoint": "validate_build",
+ "summary": "Validate record-building operations on schemas with implicit flattened layouts and huge repetitions.",
+ "traps": [
+  {
+   "kind": "MEMORY",
+   "quote": "Repetitions between 1 and 10^18. Flattened layouts may be enormous.",
+   "consequence": "Eagerly flattening all schemas causes memory exhaustion or timeout with 10^18 fields.",
+   "guard": "Represent flattened layouts implicitly; compute field positions without materializing full lists."
+  },
+  {
+   "kind": "MAGNITUDE",
+   "quote": "default fills next k positions; k and repetitions reach 10^18.",
+   "consequence": "Iterating k times causes timeout; can't determine which fields k spans without iteration.",
+   "guard": "Use modular arithmetic over repeat lengths to determine fields spanned; avoid iterating k."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Descriptor equality is recursive and includes schema indices and capacities.",
+   "consequence": "Comparing only element type misses capacity mismatch; Array(int,100) wrongly equals Array(int,50).",
+   "guard": "Recursively check all parts: element type, schema indices, and array capacities."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "Record closes only when all flattened fields filled. Array may close at any length.",
+   "consequence": "Enforcing full array fill or allowing partial record fill incorrectly rejects valid operations.",
+   "guard": "Verify all record fields filled before closing; allow arrays to close at any fill level."
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "Return 1-based index of earliest invalid operation.",
+   "consequence": "Off-by-one errors return 0-based index or len(operations) when 1-based or len(operations)+1 required.",
+   "guard": "Use 1-based indexing consistently for operation numbering in all return paths."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "Return 0 if valid and closed; len(operations)+1 if valid but open; else 1-based invalid index.",
+   "consequence": "Confusing the three cases returns wrong value: 0 when should be len+1, or invalid index when should be 0.",
+   "guard": "Clearly distinguish: return 1-based invalid index first, then 0 for closed, then len+1 for open."
+  }
+ ],
+ "input_shape": "List of schemas with repeats, capacities up to 10^18; operation sequence; max 200k schemas, 300k terms.",
+ "output_shape": "Integer: 1-based invalid operation index, 0 if all valid and closed, len(operations)+1 if open.",
+ "invariants": [
+  "Flattened layouts with 10^18 repetitions cannot be materialized; must track position implicitly.",
+  "Records must have all fields filled to close; arrays close at any fill length.",
+  "Descriptor equality includes schema indices and array capacities, checked recursively."
+ ],
+ "max_scale": "200,000 schemas; 300,000 layout terms; 10^18 repetitions and capacities."
+}

@@ -1,0 +1,52 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "summary": "Simulate a congestion-aware retry mechanism with shared spin-credit tracking and implicit error handling.",
+ "traps": [
+  {
+   "kind": "MAGNITUDE",
+   "quote": "run-length encoded chronological list... run counts are at most `10^18`",
+   "consequence": "Expanding runs into an array causes memory/time explosion; algorithm becomes infeasible.",
+   "guard": "Process outcomes implicitly with run index and offset; never expand run counts."
+  },
+  {
+   "kind": "MAGNITUDE",
+   "quote": "cost = min(2**old_level, spin_limit) where level_cap <= 60",
+   "consequence": "Computing 2^59 or overflow produces wrong spin/yield counts without arbitrary precision.",
+   "guard": "Use full-precision arithmetic; compute 2^old_level directly for all comparisons and sums."
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "After all runs are exhausted, every later attempt implicitly returns `error`.",
+   "consequence": "Retry loops fail to terminate; infinite loops or wrong attempt counts.",
+   "guard": "Track outcome position; return implicit error when past last run; count these attempts."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "packet is dropped immediately; that final 'full' causes no spin, yield, or credit deduction",
+   "consequence": "If conditions fail, credits/spins still deducted; level incorrectly reverts for next packets.",
+   "guard": "Check both conditions before any side effect; drop immediately if either fails; level persists."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "'error' fails the packet and resets the level to zero. Credits are unchanged.",
+   "consequence": "Incorrect final credits if they are reset on error instead of persisting.",
+   "guard": "On error: reset level only; never modify credits. Credits change only on 'ok' or 'full'."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "retries have already been scheduled for this packet ... max_retries applies per packet",
+   "consequence": "Global retry limit applied instead of per-packet; vastly more retries than intended.",
+   "guard": "Track retry_count per packet; check retry_count < max_retries for each packet independently."
+  }
+ ],
+ "input_shape": "Seven parameters: packet lengths (up to 200k), run-length encoded outcomes (up to 200k runs with counts 10^18), retry/level/spin limits, credit range.",
+ "output_shape": "Dictionary with 'packets' (status, retries, spins, yields per packet) and 'telemetry' (counters plus final level/credits).",
+ "invariants": [
+  "Each packet ends with exactly one status: INVALID, SENT, ERROR, or DROPPED.",
+  "Level always in [0, level_cap]; credits always in [0, credit_cap].",
+  "Retries are per-packet; max_retries applies individually, not globally."
+ ],
+ "max_scale": "200k packets; 200k outcome runs with 10^18 counts; level_cap 60; credit_cap 10^30."
+}

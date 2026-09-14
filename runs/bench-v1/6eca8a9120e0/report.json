@@ -1,0 +1,318 @@
+{
+ "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+ "language": "python",
+ "entrypoint": "capture_binders",
+ "started_at": "2026-09-14T03:29:44",
+ "status": "emitted_unverified",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": false,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 170.11,
+   "event": "analyse",
+   "traps": 0
+  },
+  {
+   "t": 170.11,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+  "language": "python",
+  "entrypoint": "capture_binders",
+  "summary": "(analysis returned no parsable JSON)",
+  "traps": [],
+  "input_shape": "",
+  "output_shape": "",
+  "invariants": [],
+  "max_scale": ""
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {},
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [
+   "oracle failed on every generated input"
+  ],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/bench\\solutions\\6eca8a9120e0.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 174.359,
+  "remaining_s": 125.641,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 170.078
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 4.25
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1103.502,
+  "prompt_chars_total": 38197,
+  "output_chars_total": 52342,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 74.23399999999674,
+    "prompt_chars": 3419,
+    "output_chars": 5616,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 81.51600000000326,
+    "prompt_chars": 3259,
+    "output_chars": 3882,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "6eca8a91",
+    "ok": true,
+    "latency_s": 87.81199999997625,
+    "prompt_chars": 6026,
+    "output_chars": 3466,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 90.25,
+    "prompt_chars": 4991,
+    "output_chars": 6452,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 109.875,
+    "prompt_chars": 3348,
+    "output_chars": 4873,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 110.20400000002701,
+    "prompt_chars": 3326,
+    "output_chars": 9488,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 117.25,
+    "prompt_chars": 3475,
+    "output_chars": 4347,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 117.59400000004098,
+    "prompt_chars": 3863,
+    "output_chars": 5358,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 144.704000000027,
+    "prompt_chars": 3026,
+    "output_chars": 3191,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 170.06300000002375,
+    "prompt_chars": 3464,
+    "output_chars": 5669,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

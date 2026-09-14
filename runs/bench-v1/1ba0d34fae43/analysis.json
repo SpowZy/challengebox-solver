@@ -1,0 +1,52 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "summary": "Simulate a congestion-aware write worker with per-packet retry scheduling, credit deduction, and implicit error handling.",
+ "traps": [
+  {
+   "kind": "PRECEDENCE",
+   "quote": "Another attempt scheduled only if... credit balance at least cost. Scheduling deducts exactly cost credits.",
+   "consequence": "Deducting on every 'full' without checking conditions causes negative balances or incorrect drops.",
+   "guard": "Check both retries_scheduled < max_retries AND credit_balance >= cost before deducting; drop if either fails."
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "run-length encoded chronological list; run counts at most 10**18",
+   "consequence": "Expanding outcome events into individual entries causes memory exhaustion and timeout.",
+   "guard": "Process outcomes as runs; track current run index and position within run without expanding."
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "After all runs exhausted, every later attempt implicitly returns error",
+   "consequence": "Solutions assuming sufficient outcomes crash when outcome list is fully consumed.",
+   "guard": "Track outcome exhaustion; provide implicit 'error' outcomes thereafter (reset level, no credit change)."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "performs exactly one scheduler yield if 2**old_level > spin_limit",
+   "consequence": "Using cost > spin_limit for yield condition produces wrong yield counts.",
+   "guard": "Yield based on 2**old_level > spin_limit, not on whether cost is capped."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "packet valid exactly when length in [1, 65535]. Invalid packets make no attempt.",
+   "consequence": "Assuming all packets valid produces wrong statuses and missing invalid packet count.",
+   "guard": "Validate length before processing; if invalid, mark INVALID and skip outcome consumption entirely."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "one (status, retries, spins, yields) tuple per input length",
+   "consequence": "Outputting results in attempt processing order breaks correspondence between packets and tuples.",
+   "guard": "Track original packet index; output tuples in input packet order, not processing order."
+  }
+ ],
+ "input_shape": "packets (max 200K), outcomes (run-length encoded, up to 200K runs with counts to 10^18), max_retries, level_cap (0-60), spin_limit, credits (0-10^30)",
+ "output_shape": "dictionary with 'packets' (status, retries, spins, yields tuples per input packet) and 'telemetry' (9 counters)",
+ "invariants": [
+  "Congestion level always in [0, level_cap]; spin credits always in [0, credit_cap]",
+  "Invalid packets (length outside [1, 65535]) consume zero outcomes and affect zero state",
+  "Each packet has independent retry counter limited by max_retries and available credits"
+ ],
+ "max_scale": "200,000 packets; 200,000 outcome runs with cumulative count up to 10^18 events"
+}

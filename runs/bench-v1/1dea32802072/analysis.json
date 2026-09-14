@@ -1,0 +1,52 @@
+{
+ "problem_id": "1dea328020722d9c3737e123e64dafc670e9bcbc8a9e0d3163eb6352fa2d9710",
+ "language": "python",
+ "entrypoint": "track_indicator",
+ "summary": "Tracks the index of the selected tab after insert, remove, and reverse operations on a tab strip.",
+ "traps": [
+  {
+   "kind": "RANGES",
+   "quote": "reverse the order of all tabs at positions from left through right - 1",
+   "consequence": "Off-by-one error: reversing [left, right] inclusive instead of [left, right) exclusive",
+   "guard": "Implement half-open interval as list[left:right], not list[left:right+1]"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "select the first surviving tab to its right; if none exists, select the last surviving tab to its left",
+   "consequence": "Selects wrong tab if left-first precedence applied or order reversed",
+   "guard": "Search right strictly before left; apply conditions in exact stated order, first-match-wins"
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Selection remains attached to the same identifier.",
+   "consequence": "Position-based tracking breaks: selected index shifts when tabs inserted/removed before it",
+   "guard": "Track selected by identifier ID, not position; recompute position from current order each operation"
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "use the order immediately before this operation and disregard every removed tab other than the selected tab",
+   "consequence": "Using post-removal positions for right/left search yields wrong surviving tab",
+   "guard": "Cache pre-removal order before applying removes; search direction from pre-removal position"
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "if none survives, leave the strip unselected. If the strip was empty, the first inserted becomes selected.",
+   "consequence": "Crash or logic error if code assumes selection always exists; -1 to id transition broken",
+   "guard": "Handle selected_id == -1 state throughout; insert correctly transitions empty strip to selected"
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "Reversed ranges have no bound on their combined length.",
+   "consequence": "Naive reversal per operation could TLE: 200k ops × 300k items quadratic cost",
+   "guard": "Ensure each operation is O(n) amortized; avoid rebuilding entire list per reverse"
+  }
+ ],
+ "input_shape": "initial_ids list, selected_index int, operations list. Total IDs ≤300k across inserts. Operations ≤200k.",
+ "output_shape": "List of integers: zero-based selected tab index, or -1 if no tab selected, after each operation.",
+ "invariants": [
+  "All identifiers distinct; never reused after removal",
+  "At most one tab selected; selection stays with same identifier through all operations",
+  "Remove with all-tabs-removed leaves strip unselected; next insert selects first"
+ ],
+ "max_scale": "300,000 total identifiers, 200,000 operations, unbounded reverse range lengths"
+}

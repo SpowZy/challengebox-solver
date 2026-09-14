@@ -1,0 +1,52 @@
+{
+ "problem_id": "5ce30ef9e5cf1df58aaba388f1c3b0ea9fd24d1eb843d96bb1c6c5fd21396bc2",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "Manage reversible object attribute overlays with activations that can be started, stopped, and queried.",
+ "traps": [
+  {
+   "kind": "PRECEDENCE",
+   "quote": "resolve its path after all preceding replacements in that same activation have been applied",
+   "consequence": "Using stale values when paths depend on other replacements in activation",
+   "guard": "Resolve each path immediately before applying replacement, seeing current state"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "read and follow the object reference in every attribute except the last",
+   "consequence": "Following final attribute as reference instead of reading it as target cell",
+   "guard": "Follow L-1 attributes to reach target object, then read cell at attribute L"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "restore that activation's remembered writes in reverse replacement order",
+   "consequence": "Restored values applied in wrong order, overwriting each other incorrectly",
+   "guard": "When restoring, iterate replacements in reverse order"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "STOPALL stops all active activations from newest to oldest",
+   "consequence": "Restored values overwritten by subsequent restorations in wrong order",
+   "guard": "Stop activations in reverse order (newest/most-recent first)"
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "number of active activations followed by their IDs from oldest to newest on one line",
+   "consequence": "Wrong output format or ID order, failing test cases",
+   "guard": "Print count and IDs on same line, IDs in activation order (oldest first)"
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "Remembered paths are never resolved again",
+   "consequence": "Re-resolving paths gets different cells after other activations change values",
+   "guard": "Store resolved cell reference when remembering, restore to that cell"
+  }
+ ],
+ "input_shape": "N,K,Q bounds; K cells with object/attribute/kind/value; Q commands (START, STOP, STOPALL, GET, STACK)",
+ "output_shape": "GET outputs (I x or O x); STACK outputs (count and activation IDs on one line)",
+ "invariants": [
+  "Replacements in activation see effects of preceding replacements in same activation",
+  "Restoration must happen in reverse of replacement order within activation",
+  "STOPALL processes activations from newest to oldest, not oldest to newest"
+ ],
+ "max_scale": "N,K,Q ≤ 200k; total replacements ≤ 200k; sum path lengths ≤ 400k"
+}

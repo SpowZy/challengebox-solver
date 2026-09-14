@@ -1,0 +1,52 @@
+{
+ "problem_id": "2beff58fa923cf9e2df2b235a24c42021d9c9553f19fcfd01e46c7fae4987efb",
+ "language": "python",
+ "entrypoint": "refresh_references",
+ "summary": "Match references to entries across snapshot states, returning (status, namespace, location, hash).",
+ "traps": [
+  {
+   "kind": "REDEFINITION",
+   "quote": "a function match changes the namespace to \"function\"",
+   "consequence": "Value reference matching function incorrectly returns namespace='value'.",
+   "guard": "Update namespace to 'function' when value reference matches function candidate."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Once matched, the reference becomes location-authoritative immediately and for all later",
+   "consequence": "Matched reference re-matched at later snapshots; hash incorrectly updated.",
+   "guard": "Track matched references; skip re-matching once location-authoritative."
+  },
+  {
+   "kind": "UNITS",
+   "quote": "`N` is `0` or a positive decimal integer without leading zeroes",
+   "consequence": "Suffix @01 incorrectly parsed as valid; reference treated as valid.",
+   "guard": "Reject @N if N has leading zero unless N is exactly '0'."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "prepending the longest through shortest prefix of `context` to qualified parsed name",
+   "consequence": "Candidates checked in wrong order; reference matches wrong entry or misses.",
+   "guard": "Check candidates in exact longest-to-shortest order with first-match-wins."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "`start` is an integer from 0 through `len(snapshots)`",
+   "consequence": "References with start=len(snapshots) skipped if only 0..len(snapshots)-1 assumed.",
+   "guard": "Snapshot states span 0 to len(snapshots) inclusive, not 0 to len-1."
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "at most 200,000 snapshots, entries, updates, and references each",
+   "consequence": "Naive O(n²) checking every reference at every snapshot times out.",
+   "guard": "Use dict/set lookups for O(1) candidate existence checks per snapshot."
+  }
+ ],
+ "input_shape": "Initial state, up to 200k snapshot update batches, up to 200k references with namespace, name, version.",
+ "output_shape": "One tuple per reference in input order: (status, namespace, location, hash). Status is invalid, missing, or located.",
+ "invariants": [
+  "Snapshots indexed 0 through len(snapshots) inclusive; len(snapshots)+1 total states.",
+  "Once a reference is location-matched, it never re-matches in later snapshots.",
+  "References output in input order."
+ ],
+ "max_scale": "200,000 snapshots, entries, updates, references; 1,000,000 induced candidate names."
+}

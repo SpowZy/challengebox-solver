@@ -1,0 +1,359 @@
+{
+ "problem_id": "2beff58fa923cf9e2df2b235a24c42021d9c9553f19fcfd01e46c7fae4987efb",
+ "language": "python",
+ "entrypoint": "refresh_references",
+ "started_at": "2026-09-14T03:09:39",
+ "status": "emitted_unverified",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": false,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 169.75,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 169.75,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "2beff58fa923cf9e2df2b235a24c42021d9c9553f19fcfd01e46c7fae4987efb",
+  "language": "python",
+  "entrypoint": "refresh_references",
+  "summary": "Resolve references across versioned snapshots, tracking which namespace/location/hash they match.",
+  "traps": [
+   {
+    "kind": "INDEXING",
+    "quote": "The initial index is snapshot 0. Applying atomic batch i produces snapshot i.",
+    "consequence": "Off-by-one errors: solution processes wrong snapshots or crashes on edge case start=len(snapshots).",
+    "guard": "Map batch index to snapshot: snapshots[k] produces snapshot k+1. Snapshot count = len(snapshots)+1."
+   },
+   {
+    "kind": "ORDERING",
+    "quote": "form candidates by prepending the longest through shortest prefix of context",
+    "consequence": "Solution checks shortest prefix first; selects wrong candidate (ambiguity in direction).",
+    "guard": "Generate candidates with prefix length n, n-1, ..., 1, 0. Check in this order; select first match."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "a function match changes the namespace to \"function\"",
+    "consequence": "Solution returns input namespace even after matching function; output namespace wrong.",
+    "guard": "Track namespace changes: for value refs finding function match, return (\"located\", \"function\", ...)."
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "At each such snapshot, if its exact key exists, its hash becomes the entry's current hash",
+    "consequence": "Solution returns original reference hash for located status; doesn't track snapshot-level updates.",
+    "guard": "For location-authoritative refs, re-check entry at each snapshot and update hash if key exists."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "start is an integer from 0 through len(snapshots)",
+    "consequence": "Solution crashes or skips reference with start=len(snapshots), only checking final snapshot.",
+    "guard": "Handle start values 0 to len(snapshots) inclusive; process from snapshot start until end."
+   },
+   {
+    "kind": "DEGENERATE",
+    "quote": "text consists of zero or more module identifiers followed by a terminal. Any violation makes invalid.",
+    "consequence": "Solution accepts malformed text (e.g., leading uppercase, @@ suffix) or rejects valid edge cases.",
+    "guard": "Validate: identifiers [a-zA-Z0-9_]+, modules start [a-z], types start [A-Z], suffix @N only on function/value."
+   }
+  ],
+  "input_shape": "initial entries, list of snapshot batches (updates), and references with start times; at most 200k each.",
+  "output_shape": "List of 4-tuples (status, namespace, location, hash) per reference, in input order.",
+  "invariants": [
+   "Each reference is processed starting at its start snapshot; once matched, it's location-authoritative thereafter.",
+   "Deleted entries (hash=None in updates) cease to exist; location-authoritative hashes may change per snapshot.",
+   "Value references search value candidates first, then function candidates (changing namespace if matched)."
+  ],
+  "max_scale": "200k snapshots, 200k entries, 200k updates, 200k references; 1M induced candidate names total."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {},
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [
+   "oracle failed on every generated input"
+  ],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/bench\\solutions\\2beff58fa923.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 174.031,
+  "remaining_s": 125.969,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 169.719
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 4.266
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1252.891,
+  "prompt_chars_total": 40347,
+  "output_chars_total": 55668,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 81.81199999997625,
+    "prompt_chars": 3474,
+    "output_chars": 6656,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 89.84399999998277,
+    "prompt_chars": 3563,
+    "output_chars": 5801,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "2beff58f",
+    "ok": true,
+    "latency_s": 99.375,
+    "prompt_chars": 6241,
+    "output_chars": 3070,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 107.375,
+    "prompt_chars": 3634,
+    "output_chars": 5011,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 119.14100000000326,
+    "prompt_chars": 4078,
+    "output_chars": 4013,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 130.53099999995902,
+    "prompt_chars": 3541,
+    "output_chars": 6387,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 147.04699999996228,
+    "prompt_chars": 5206,
+    "output_chars": 5296,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 149.8279999999795,
+    "prompt_chars": 3690,
+    "output_chars": 6615,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 158.21899999998277,
+    "prompt_chars": 3679,
+    "output_chars": 6542,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 169.71899999998277,
+    "prompt_chars": 3241,
+    "output_chars": 6277,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

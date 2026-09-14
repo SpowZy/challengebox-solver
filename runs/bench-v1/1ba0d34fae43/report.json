@@ -1,0 +1,367 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "started_at": "2026-09-14T03:00:16",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 220.45,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 220.45,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+  "language": "python",
+  "entrypoint": "simulate_writes",
+  "summary": "Simulate a congestion-aware write worker with per-packet retry scheduling, credit deduction, and implicit error handling.",
+  "traps": [
+   {
+    "kind": "PRECEDENCE",
+    "quote": "Another attempt scheduled only if... credit balance at least cost. Scheduling deducts exactly cost credits.",
+    "consequence": "Deducting on every 'full' without checking conditions causes negative balances or incorrect drops.",
+    "guard": "Check both retries_scheduled < max_retries AND credit_balance >= cost before deducting; drop if either fails."
+   },
+   {
+    "kind": "COMPLEXITY",
+    "quote": "run-length encoded chronological list; run counts at most 10**18",
+    "consequence": "Expanding outcome events into individual entries causes memory exhaustion and timeout.",
+    "guard": "Process outcomes as runs; track current run index and position within run without expanding."
+   },
+   {
+    "kind": "DEGENERATE",
+    "quote": "After all runs exhausted, every later attempt implicitly returns error",
+    "consequence": "Solutions assuming sufficient outcomes crash when outcome list is fully consumed.",
+    "guard": "Track outcome exhaustion; provide implicit 'error' outcomes thereafter (reset level, no credit change)."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "performs exactly one scheduler yield if 2**old_level > spin_limit",
+    "consequence": "Using cost > spin_limit for yield condition produces wrong yield counts.",
+    "guard": "Yield based on 2**old_level > spin_limit, not on whether cost is capped."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "packet valid exactly when length in [1, 65535]. Invalid packets make no attempt.",
+    "consequence": "Assuming all packets valid produces wrong statuses and missing invalid packet count.",
+    "guard": "Validate length before processing; if invalid, mark INVALID and skip outcome consumption entirely."
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "one (status, retries, spins, yields) tuple per input length",
+    "consequence": "Outputting results in attempt processing order breaks correspondence between packets and tuples.",
+    "guard": "Track original packet index; output tuples in input packet order, not processing order."
+   }
+  ],
+  "input_shape": "packets (max 200K), outcomes (run-length encoded, up to 200K runs with counts to 10^18), max_retries, level_cap (0-60), spin_limit, credits (0-10^30)",
+  "output_shape": "dictionary with 'packets' (status, retries, spins, yields tuples per input packet) and 'telemetry' (9 counters)",
+  "invariants": [
+   "Congestion level always in [0, level_cap]; spin credits always in [0, credit_cap]",
+   "Invalid packets (length outside [1, 65535]) consume zero outcomes and affect zero state",
+   "Each packet has independent retry counter limited by max_retries and available credits"
+  ],
+  "max_scale": "200,000 packets; 200,000 outcome runs with cumulative count up to 10^18 events"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.141
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.141
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/bench\\solutions\\1ba0d34fae43.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 238.563,
+  "remaining_s": 61.437,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 220.438
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 18.094
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1030.561,
+  "prompt_chars_total": 35307,
+  "output_chars_total": 28693,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 46.15600000001723,
+    "prompt_chars": 3130,
+    "output_chars": 2616,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 59.14000000001397,
+    "prompt_chars": 3059,
+    "output_chars": 2659,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 70.39000000001397,
+    "prompt_chars": 3037,
+    "output_chars": 2550,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 78.40600000001723,
+    "prompt_chars": 3574,
+    "output_chars": 4219,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 96.04700000002049,
+    "prompt_chars": 4702,
+    "output_chars": 2959,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 99.42200000002049,
+    "prompt_chars": 2737,
+    "output_chars": 2506,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 104.20300000003772,
+    "prompt_chars": 2970,
+    "output_chars": 2477,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 128.07800000003772,
+    "prompt_chars": 3175,
+    "output_chars": 2965,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 128.28100000001723,
+    "prompt_chars": 3186,
+    "output_chars": 2734,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "1ba0d34f",
+    "ok": true,
+    "latency_s": 220.43800000002375,
+    "prompt_chars": 5737,
+    "output_chars": 3008,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

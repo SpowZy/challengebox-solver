@@ -1,0 +1,52 @@
+{
+ "problem_id": "6e43a08ec05a97ff0489d2f75736b87e39e02d8691f594495efc6cd83b485c98",
+ "language": "python",
+ "entrypoint": "normalize_protection",
+ "summary": "Apply row/column edits to protected cell rectangles, output merged canonical rectangles",
+ "traps": [
+  {
+   "kind": "OUTPUT",
+   "quote": "every maximal consecutive sequence of rows on which that exact interval occurs becomes one",
+   "consequence": "Output lists column-intervals per-row instead of merging rows with identical protected-column spans",
+   "guard": "After computing final protected cells per row, group and merge consecutive rows sharing column intervals"
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "Edit index 1 <= index <= dimension, but rectangle coordinate indexing scheme: not stated",
+   "consequence": "Off-by-one errors applying 1-indexed edits to 0-indexed rectangles or vice versa",
+   "guard": "Establish whether rectangles are 0-indexed or 1-indexed; apply all edits in consistent indexing space"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "cells moved beyond the fixed worksheet boundary are discarded",
+   "consequence": "Rectangles extending into rows/columns beyond max_row/max_col after insertion incorrectly survive",
+   "guard": "After each insertion, remove or clip rectangles with indices beyond max_row or max_col"
+  },
+  {
+   "kind": "MEMORY",
+   "quote": "Do not enumerate individual worksheet cells or rows. Dimensions at most 10^9",
+   "consequence": "Out-of-memory or timeout attempting to materialize or loop through 10^9-row worksheet",
+   "guard": "Represent worksheet implicitly; track only rectangles as tuples, never iterate rows or create grid"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "Delete lines index through index+d-1... final d lines become unprotected",
+   "consequence": "Rectangles in deletion range clipped incorrectly, or final d lines incorrectly remain protected",
+   "guard": "Clip rectangles intersecting [index,index+d-1] completely; ensure rows (max_row-d+1..max_row) become unprotected"
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "30,000 edits, 150,000 rectangles, output 200,000 intervals. Do not enumerate",
+   "consequence": "TLE from O(edits × rectangles) loop tracking each rectangle independently through all edits",
+   "guard": "Use efficient interval merging per edit (union, overlap detection); merge overlapping rectangles"
+  }
+ ],
+ "input_shape": "ranges (≤30k rectangles), edits (≤30k row/col inserts/deletes), max_row/max_col (≤10^9)",
+ "output_shape": "Lexicographically sorted list of (r1,c1,r2,c2) rectangles, canonical merged form",
+ "invariants": [
+  "Worksheet dimensions remain max_row × max_col throughout all edits",
+  "Output rectangles are disjoint, merged by row-run, sorted lexicographically",
+  "Inserted lines are unprotected; cells moved beyond max_row are discarded"
+ ],
+ "max_scale": "30k rectangles, 30k edits, 10^9 dimensions, intermediate 150k rectangles, output ≤200k"
+}

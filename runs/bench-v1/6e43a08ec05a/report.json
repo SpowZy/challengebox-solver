@@ -1,0 +1,410 @@
+{
+ "problem_id": "6e43a08ec05a97ff0489d2f75736b87e39e02d8691f594495efc6cd83b485c98",
+ "language": "python",
+ "entrypoint": "normalize_protection",
+ "started_at": "2026-09-14T03:26:02",
+ "status": "emitted_unverified",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": false,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 201.89,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 201.89,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "6e43a08ec05a97ff0489d2f75736b87e39e02d8691f594495efc6cd83b485c98",
+  "language": "python",
+  "entrypoint": "normalize_protection",
+  "summary": "Apply row/column edits to protected cell rectangles, output merged canonical rectangles",
+  "traps": [
+   {
+    "kind": "OUTPUT",
+    "quote": "every maximal consecutive sequence of rows on which that exact interval occurs becomes one",
+    "consequence": "Output lists column-intervals per-row instead of merging rows with identical protected-column spans",
+    "guard": "After computing final protected cells per row, group and merge consecutive rows sharing column intervals"
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "Edit index 1 <= index <= dimension, but rectangle coordinate indexing scheme: not stated",
+    "consequence": "Off-by-one errors applying 1-indexed edits to 0-indexed rectangles or vice versa",
+    "guard": "Establish whether rectangles are 0-indexed or 1-indexed; apply all edits in consistent indexing space"
+   },
+   {
+    "kind": "RANGES",
+    "quote": "cells moved beyond the fixed worksheet boundary are discarded",
+    "consequence": "Rectangles extending into rows/columns beyond max_row/max_col after insertion incorrectly survive",
+    "guard": "After each insertion, remove or clip rectangles with indices beyond max_row or max_col"
+   },
+   {
+    "kind": "MEMORY",
+    "quote": "Do not enumerate individual worksheet cells or rows. Dimensions at most 10^9",
+    "consequence": "Out-of-memory or timeout attempting to materialize or loop through 10^9-row worksheet",
+    "guard": "Represent worksheet implicitly; track only rectangles as tuples, never iterate rows or create grid"
+   },
+   {
+    "kind": "RANGES",
+    "quote": "Delete lines index through index+d-1... final d lines become unprotected",
+    "consequence": "Rectangles in deletion range clipped incorrectly, or final d lines incorrectly remain protected",
+    "guard": "Clip rectangles intersecting [index,index+d-1] completely; ensure rows (max_row-d+1..max_row) become unprotected"
+   },
+   {
+    "kind": "COMPLEXITY",
+    "quote": "30,000 edits, 150,000 rectangles, output 200,000 intervals. Do not enumerate",
+    "consequence": "TLE from O(edits × rectangles) loop tracking each rectangle independently through all edits",
+    "guard": "Use efficient interval merging per edit (union, overlap detection); merge overlapping rectangles"
+   }
+  ],
+  "input_shape": "ranges (≤30k rectangles), edits (≤30k row/col inserts/deletes), max_row/max_col (≤10^9)",
+  "output_shape": "Lexicographically sorted list of (r1,c1,r2,c2) rectangles, canonical merged form",
+  "invariants": [
+   "Worksheet dimensions remain max_row × max_col throughout all edits",
+   "Output rectangles are disjoint, merged by row-run, sorted lexicographically",
+   "Inserted lines are unprotected; cells moved beyond max_row are discarded"
+  ],
+  "max_scale": "30k rectangles, 30k edits, 10^9 dimensions, intermediate 150k rectangles, output ≤200k"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {
+   "!=!!!==!!=!!!!!!!!": [
+    "adversarial"
+   ],
+   "=======!!=!!!!!!!!": [
+    "literal"
+   ],
+   "=======!==!=!!!!!!": [
+    "traps",
+    "restate",
+    "edgefirst"
+   ],
+   "=======!==!!!!!!!!": [
+    "complexity"
+   ],
+   "=======!==!=!!!!=!": [
+    "plain"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial} | {literal} | {edgefirst, restate, traps} | {complexity} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 11,
+    "disagree": 7,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==!=!!!!=!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[16, 31, 25, 37], [26, 11, 30, 18], [26, 31, 30, 37], [31, 11, 33, 37], [34, 11, 39, 18], [34, 31, 39, 37], [40, 11, 46, 18], [40, 34, 46, 37], [47, 11, 59, 18]]"
+    },
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 8,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==!=!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[17, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [33, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]"
+    },
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 8,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==!=!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[16, 31, 16, 37], [17, 31, 25, 37], [26, 11, 30, 18], [26, 31, 30, 37], [31, 11, 31, 37], [32, 11, 32, 37], [33, 11, 33, 37], [34, 11, 39, 18], [34, 31, 39, 37], [40, 11, 46, 18], [40, 34, 46, 37], [47, 11, 59, 18]]"
+    },
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 8,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==!=!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[16, 31, 16, 37], [17, 31, 25, 37], [26, 11, 30, 18], [26, 31, 30, 37], [31, 11, 31, 37], [32, 11, 32, 37], [33, 11, 33, 37], [34, 11, 39, 18], [34, 31, 39, 37], [40, 11, 46, 18], [40, 34, 46, 37], [47, 11, 59, 18]]"
+    },
+    "max_duration_s": 0.141
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 9,
+    "disagree": 9,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[16, 31, 30, 37], [26, 11, 30, 18], [31, 11, 33, 37], [34, 11, 59, 18], [34, 31, 39, 37], [40, 34, 46, 37]]"
+    },
+    "max_duration_s": 0.141
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 8,
+    "disagree": 10,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!!=!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#32419",
+     "input": "[[[32, 31, 48, 35], [16, 28, 41, 37], [17, 29, 34, 35], [31, 8, 35, 33], [26, 8, 61, 15]], [[\"column\", 3, 3], [\"row\", 32, -2]], 61, 37]",
+     "oracle": "[[16, 31, 25, 40], [26, 11, 30, 18], [26, 31, 30, 40], [31, 11, 33, 40], [34, 11, 39, 18], [34, 31, 39, 40], [40, 11, 46, 18], [40, 34, 46, 38], [47, 11, 59, 18]]",
+     "candidate": "[[16, 31, 30, 37], [26, 11, 30, 18], [31, 11, 33, 37], [34, 11, 59, 18], [34, 31, 39, 37], [40, 34, 46, 37]]"
+    },
+    "max_duration_s": 0.141
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 4,
+    "disagree": 14,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!=!!!==!!=!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#6920",
+     "input": "[[[1, 1, 5, 5], [3, 3, 7, 7]], [], 10, 10]",
+     "oracle": "[[1, 1, 2, 5], [3, 1, 5, 7], [6, 3, 7, 7]]",
+     "candidate": "[[1, 1, 1, 5], [3, 1, 3, 7], [6, 3, 6, 7]]"
+    },
+    "max_duration_s": 0.125
+   }
+  ]
+ },
+ "final_candidate": "plain",
+ "output_path": "runs/bench\\solutions\\6e43a08ec05a.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 222.187,
+  "remaining_s": 77.813,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 201.875
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 20.297
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1298.861,
+  "prompt_chars_total": 33617,
+  "output_chars_total": 42332,
+  "detail": [
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 70.89100000000326,
+    "prompt_chars": 3006,
+    "output_chars": 4853,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 78.96899999998277,
+    "prompt_chars": 3405,
+    "output_chars": 4510,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 95.25,
+    "prompt_chars": 4533,
+    "output_chars": 3469,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 109.26600000000326,
+    "prompt_chars": 2868,
+    "output_chars": 4821,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 115.125,
+    "prompt_chars": 2568,
+    "output_chars": 4922,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "6e43a08e",
+    "ok": true,
+    "latency_s": 128.60999999998603,
+    "prompt_chars": 5568,
+    "output_chars": 2916,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 158.9529999999795,
+    "prompt_chars": 2801,
+    "output_chars": 3827,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 159.0470000000205,
+    "prompt_chars": 3017,
+    "output_chars": 4246,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 180.89100000000326,
+    "prompt_chars": 2890,
+    "output_chars": 4245,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 201.85899999999674,
+    "prompt_chars": 2961,
+    "output_chars": 4523,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

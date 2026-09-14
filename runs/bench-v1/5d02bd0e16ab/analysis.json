@@ -1,0 +1,52 @@
+{
+ "problem_id": "5d02bd0e16ab63c540232452b60e8e6cf36d01e0820cb6b422b63c1a31091718",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "A multi-version queue simulator with demand-aware consumption, hash-tracked drains, and status reporting.",
+ "traps": [
+  {
+   "kind": "MAGNITUDE",
+   "quote": "r is the unique integer in 0..1000000006 congruent to the signed value modulo 1000000007",
+   "consequence": "Negative remainder in hash, wrong final hash output",
+   "guard": "Map signed i64 to [0, MOD) using ((x % MOD) + MOD) % MOD"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "A value is consumed only if d>0; ... If d=0, draining stops before that value.",
+   "consequence": "Consumes one extra value, wrong m count and hash h",
+   "guard": "Before consuming any value, check d>0; skip consuming if d=0 without advancing c"
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "An unpublished slot stops draining. A completion is consumed by advancing c. A value is consumed only if d>0.",
+   "consequence": "Wrong events consumed, incorrect m, p, c, d in final state",
+   "guard": "For slot at c, check in order: if unpublished stop; if completion consume; if value check d"
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "Operation i creates version i from earlier version b; versions may branch.",
+   "consequence": "State mutations in base version leak to branches or vice versa, wrong output",
+   "guard": "Each version stores independent state for p, c, d, reservations, publications; branching copies, not shares"
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "Status is COMPLETE if p=c=N; WAITING if c=p<N; BLOCKED if c<p and slot c unpublished; BACKPRESSURE if c<p and slot c has value but d=0.",
+   "consequence": "Wrong status output if conditions checked in wrong order or overlap",
+   "guard": "Ensure status logic checks all four conditions and returns exactly one; verify mutual exclusivity"
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "Producer IDs are 1..N. Queue tickets 0..N-1. Producer s receives ticket p.",
+   "consequence": "Off-by-one errors mapping producer ID to slot, wrong values consumed",
+   "guard": "Keep producer ID (1-indexed) separate from ticket index (0-indexed); map s to slot s-1 when accessing"
+  }
+ ],
+ "input_shape": "N Q (producers, operations), then Q lines: R/W/D/P operations on N producers with demand up to 10^18.",
+ "output_shape": "For each P (drain) operation: DRAIN m h status p c d where m, h are output count and hash.",
+ "invariants": [
+  "Each producer reserves once, publishes once; cannot reserve or publish an unreserved or already-published producer",
+  "Version i is derived from version b<i; versions branch independently without affecting base version state",
+  "Draining consumes tickets starting at c in order until hitting unpublished, reaching c=p, or d=0 before a value"
+ ],
+ "max_scale": "N=150000 producers, Q=150000 operations, demand per ancestry up to 10^18."
+}

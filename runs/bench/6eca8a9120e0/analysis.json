@@ -1,0 +1,52 @@
+{
+ "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+ "language": "python",
+ "entrypoint": "capture_binders",
+ "summary": "Identify declarations whose names appear free in replacements and occur on paths through those declarations in the expression DAG.",
+ "traps": [
+  {
+   "kind": "COMPLEXITY",
+   "quote": "Graph paths and replacement-tree depth may be linear in the node count.",
+   "consequence": "O(n²) naive algorithms timeout; 250k × path-length iterations exceeds time limits.",
+   "guard": "Design solution respecting DAG structure; avoid per-node iteration over all paths."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "a node may have multiple incoming child references. Its meaning for this task is its complete unfolding into a tree.",
+   "consequence": "Incorrect capture detection; same var node represents multiple distinct occurrences with different scopes.",
+   "guard": "Process all paths to each node or conceptually unfold DAG; do not process each node occurrence once."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "An original declaration is capturing if there exists at least one replaced occurrence such that: the occurrence's path crosses the scoped edge introducing that declaration, and the declaration's name is free in the replacement.",
+   "consequence": "Misidentified capturing declarations; only path crossing OR only free-in-replacement is insufficient.",
+   "guard": "Check both conditions for every replaced occurrence: scoped edge crossed AND name is free in replacement."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "A bind, let, or match term type defines distinct scope rules for declarations, body, and auxiliary terms.",
+   "consequence": "Wrong scope analysis; declarations applied over wrong subterms; incorrect capture detection.",
+   "guard": "Implement exact per-term-type scope rules; track which subterms fall under which declarations."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Every auxiliary term uses the scope surrounding the whole `match`, not the arm's scope.",
+   "consequence": "Auxiliary terms incorrectly analyzed as if in arm scope; wrong declarations active.",
+   "guard": "Evaluate auxiliaries in outer match scope; do not include arm-local declarations in auxiliary scope."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "the declaration's name is free in the replacement",
+   "consequence": "False negatives or false positives; missing capture or over-reporting if free-variable analysis is incomplete.",
+   "guard": "Traverse entire replacement tree; identify all names bound by replacement's declarations and subtract from all names."
+  }
+ ],
+ "input_shape": "List of up to 250k term nodes; two roots; target name; max 500k child references and declaration edges; DAG may have paths of linear depth.",
+ "output_shape": "Python list of integers (declaration IDs), sorted in increasing order, or empty list.",
+ "invariants": [
+  "Expression root has no incoming reference; every other expression node has exactly one parent within its structure.",
+  "Replacement root has no parent; every other replacement node has exactly one parent within its structure.",
+  "Expression graph is acyclic; replacement tree is acyclic; both have disjoint reachable node sets."
+ ],
+ "max_scale": "250,000 total nodes across both structures; 500,000 child references plus declaration edges; linear graph depth."
+}

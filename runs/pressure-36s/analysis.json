@@ -1,0 +1,11 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "summary": "(analysis unavailable: analyse:1ba0d34f timed out after 30.0s)",
+ "traps": [],
+ "input_shape": "",
+ "output_shape": "",
+ "invariants": [],
+ "max_scale": ""
+}

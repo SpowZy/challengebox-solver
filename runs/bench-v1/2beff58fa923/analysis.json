@@ -1,0 +1,52 @@
+{
+ "problem_id": "2beff58fa923cf9e2df2b235a24c42021d9c9553f19fcfd01e46c7fae4987efb",
+ "language": "python",
+ "entrypoint": "refresh_references",
+ "summary": "Resolve references across versioned snapshots, tracking which namespace/location/hash they match.",
+ "traps": [
+  {
+   "kind": "INDEXING",
+   "quote": "The initial index is snapshot 0. Applying atomic batch i produces snapshot i.",
+   "consequence": "Off-by-one errors: solution processes wrong snapshots or crashes on edge case start=len(snapshots).",
+   "guard": "Map batch index to snapshot: snapshots[k] produces snapshot k+1. Snapshot count = len(snapshots)+1."
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "form candidates by prepending the longest through shortest prefix of context",
+   "consequence": "Solution checks shortest prefix first; selects wrong candidate (ambiguity in direction).",
+   "guard": "Generate candidates with prefix length n, n-1, ..., 1, 0. Check in this order; select first match."
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "a function match changes the namespace to \"function\"",
+   "consequence": "Solution returns input namespace even after matching function; output namespace wrong.",
+   "guard": "Track namespace changes: for value refs finding function match, return (\"located\", \"function\", ...)."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "At each such snapshot, if its exact key exists, its hash becomes the entry's current hash",
+   "consequence": "Solution returns original reference hash for located status; doesn't track snapshot-level updates.",
+   "guard": "For location-authoritative refs, re-check entry at each snapshot and update hash if key exists."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "start is an integer from 0 through len(snapshots)",
+   "consequence": "Solution crashes or skips reference with start=len(snapshots), only checking final snapshot.",
+   "guard": "Handle start values 0 to len(snapshots) inclusive; process from snapshot start until end."
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "text consists of zero or more module identifiers followed by a terminal. Any violation makes invalid.",
+   "consequence": "Solution accepts malformed text (e.g., leading uppercase, @@ suffix) or rejects valid edge cases.",
+   "guard": "Validate: identifiers [a-zA-Z0-9_]+, modules start [a-z], types start [A-Z], suffix @N only on function/value."
+  }
+ ],
+ "input_shape": "initial entries, list of snapshot batches (updates), and references with start times; at most 200k each.",
+ "output_shape": "List of 4-tuples (status, namespace, location, hash) per reference, in input order.",
+ "invariants": [
+  "Each reference is processed starting at its start snapshot; once matched, it's location-authoritative thereafter.",
+  "Deleted entries (hash=None in updates) cease to exist; location-authoritative hashes may change per snapshot.",
+  "Value references search value candidates first, then function candidates (changing namespace if matched)."
+ ],
+ "max_scale": "200k snapshots, 200k entries, 200k updates, 200k references; 1M induced candidate names total."
+}

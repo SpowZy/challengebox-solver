@@ -1,0 +1,855 @@
+[
+ {
+  "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+  "short": "1ba0d34fae43",
+  "language": "python",
+  "entrypoint": "simulate_writes",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 152.5,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 2959,
+  "stderr_tail": "[ 152.2s]   complexity   agree=8   disagree=10  crash=0 timeout=0 fp=!!=====!!!=!!!=!=!\n[ 152.2s] wrote runs/bench\\solutions\\1ba0d34fae43.py from framing 'adversarial' -> verified_against_reference\n[ 152.2s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate, traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "adversarial",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "plain"
+   ],
+   "!!=====!!!=!!!=!=!": [
+    "complexity"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 6,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate, traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 895.926,
+  "_candidates": [
+   {
+    "framing": "adversarial",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 8,
+    "disagree": 10,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+  "short": "1c182498c9c7",
+  "language": "rust",
+  "entrypoint": "main",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 176.0,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 3341,
+  "stderr_tail": "[ 175.9s]   literal      agree=0   disagree=0   crash=0 timeout=0 fp=-\n[ 175.9s] wrote runs/bench\\solutions\\1c182498c9c7.rs from framing 'restate' -> verified_against_reference\n[ 175.9s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, plain, traps} | {edgefirst, restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "restate",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "=======!==========": [
+    "adversarial",
+    "traps",
+    "plain"
+   ],
+   "==================": [
+    "restate",
+    "edgefirst"
+   ],
+   "=======!====!!!!!!": [
+    "complexity"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 2,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, plain, traps} | {edgefirst, restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1104.956,
+  "_candidates": [
+   {
+    "framing": "restate",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 17,
+    "disagree": 1,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 17,
+    "disagree": 1,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 17,
+    "disagree": 1,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 11,
+    "disagree": 7,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 0,
+    "disagree": 0,
+    "compiled": false
+   }
+  ]
+ },
+ {
+  "problem_id": "1dea328020722d9c3737e123e64dafc670e9bcbc8a9e0d3163eb6352fa2d9710",
+  "short": "1dea32802072",
+  "language": "python",
+  "entrypoint": "track_indicator",
+  "deadline_s": 300.0,
+  "exit_code": 1,
+  "elapsed_s": 161.5,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 1540,
+  "stderr_tail": "[ 161.3s]   restate      agree=0   disagree=18  crash=0 timeout=0 fp=!!!!!!!!!!!!!!!!!!\n[ 161.3s]   plain        agree=0   disagree=18  crash=0 timeout=0 fp=!!!!!!!!!!!!!!!!!!\n[ 161.3s] wrote runs/bench\\solutions\\1dea32802072.py from framing 'adversarial' -> emitted_unverified",
+  "status": "emitted_unverified",
+  "final_candidate": "adversarial",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "!!!!!!!!!!!!!!!!!!": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 0,
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "model_calls": 10,
+  "model_seconds": 637.549,
+  "_candidates": [
+   {
+    "framing": "adversarial",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 0,
+    "disagree": 18,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "2beff58fa923cf9e2df2b235a24c42021d9c9553f19fcfd01e46c7fae4987efb",
+  "short": "2beff58fa923",
+  "language": "python",
+  "entrypoint": "refresh_references",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 215.5,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 4854,
+  "stderr_tail": "[ 215.3s]   restate      agree=6   disagree=12  crash=0 timeout=0 fp=======!!!!!!!!!!!!\n[ 215.3s] wrote runs/bench\\solutions\\2beff58fa923.py from framing 'adversarial' -> verified_against_reference\n[ 215.3s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, literal} | {edgefirst, plain, traps} | {restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "adversarial",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal"
+   ],
+   "============!!!!!!": [
+    "traps",
+    "edgefirst",
+    "plain"
+   ],
+   "======!!!!!!!!!!!!": [
+    "restate"
+   ],
+   "======XXXXXXXXXXXX": [
+    "complexity"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 3,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, literal} | {edgefirst, plain, traps} | {restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1262.547,
+  "_candidates": [
+   {
+    "framing": "adversarial",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 12,
+    "disagree": 6,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 12,
+    "disagree": 6,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 12,
+    "disagree": 6,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 6,
+    "disagree": 12,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "4e49a099fd84fad956c856b0bb613db05b87316550730c4ac1329a2f26775465",
+  "short": "4e49a099fd84",
+  "language": "rust",
+  "entrypoint": "main",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 225.8,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 3807,
+  "stderr_tail": "[ 225.6s]   plain        agree=13  disagree=0   crash=4 timeout=0 fp==========X=X=XX==\n[ 225.6s] wrote runs/bench\\solutions\\4e49a099fd84.rs from framing 'edgefirst' -> verified_against_reference\n[ 225.6s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, complexity, edgefirst, literal, restate, traps} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "edgefirst",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 17,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "=================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity"
+   ],
+   "=========X=X=XX==": [
+    "plain"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 7,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, complexity, edgefirst, literal, restate, traps} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1175.235,
+  "_candidates": [
+   {
+    "framing": "edgefirst",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 13,
+    "disagree": 0,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "5cb294c18288f6ea4e50d59fd9831610232b6df28cc1a84b7d23e3d1eb5c7bb1",
+  "short": "5cb294c18288",
+  "language": "python",
+  "entrypoint": "validate_build",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 186.9,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 7328,
+  "stderr_tail": "[ 186.6s]   traps        agree=4   disagree=13  crash=0 timeout=0 fp=!!=!=!=!!=!!!!!!!\n[ 186.6s] wrote runs/bench\\solutions\\5cb294c18288.py from framing 'complexity' -> verified_against_reference\n[ 186.6s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, complexity, literal} | {edgefirst, plain, restate, traps}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "complexity",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 17,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "=================": [
+    "adversarial",
+    "literal",
+    "complexity"
+   ],
+   "!!=!=!=!!=!!!!!!!": [
+    "traps",
+    "restate",
+    "edgefirst",
+    "plain"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 3,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, complexity, literal} | {edgefirst, plain, restate, traps}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1212.97,
+  "_candidates": [
+   {
+    "framing": "complexity",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 17,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 4,
+    "disagree": 13,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 4,
+    "disagree": 13,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 4,
+    "disagree": 13,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 4,
+    "disagree": 13,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "5ce30ef9e5cf1df58aaba388f1c3b0ea9fd24d1eb843d96bb1c6c5fd21396bc2",
+  "short": "5ce30ef9e5cf",
+  "language": "rust",
+  "entrypoint": "main",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 184.0,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 4690,
+  "stderr_tail": "[ 183.3s]   plain        agree=6   disagree=0   crash=0 timeout=0 fp=======\n[ 183.3s]   literal      agree=6   disagree=0   crash=0 timeout=0 fp=======\n[ 183.3s] wrote runs/bench\\solutions\\5ce30ef9e5cf.rs from framing 'restate' -> verified_against_reference",
+  "status": "verified_against_reference",
+  "final_candidate": "restate",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 6,
+  "generator_error": null,
+  "notes": [
+   "thin evidence: the reference answered on only 6 of 18 generated inputs, so every agreement below rests on that many cases"
+  ],
+  "clusters": {
+   "======": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 7,
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "model_calls": 10,
+  "model_seconds": 1134.483,
+  "_candidates": [
+   {
+    "framing": "restate",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "5d02bd0e16ab63c540232452b60e8e6cf36d01e0820cb6b422b63c1a31091718",
+  "short": "5d02bd0e16ab",
+  "language": "rust",
+  "entrypoint": "main",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 167.6,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 3853,
+  "stderr_tail": "[ 167.3s]   restate      agree=4   disagree=14  crash=0 timeout=0 fp=!!!!!===!!!=!!!!!!\n[ 167.3s] wrote runs/bench\\solutions\\5d02bd0e16ab.rs from framing 'traps' -> verified_against_reference\n[ 167.3s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, traps} | {restate} | {complexity} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "traps",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "edgefirst"
+   ],
+   "!!!!!===!!!=!!!!!!": [
+    "restate"
+   ],
+   "========!!==!!!!!!": [
+    "complexity"
+   ],
+   "======XXXXXXXXXXXX": [
+    "plain"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 5,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, traps} | {restate} | {complexity} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1165.895,
+  "_candidates": [
+   {
+    "framing": "traps",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 6,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 10,
+    "disagree": 8,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 4,
+    "disagree": 14,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "6e43a08ec05a97ff0489d2f75736b87e39e02d8691f594495efc6cd83b485c98",
+  "short": "6e43a08ec05a",
+  "language": "python",
+  "entrypoint": "normalize_protection",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 161.4,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 4612,
+  "stderr_tail": "[ 161.1s]   traps        agree=8   disagree=10  crash=0 timeout=0 fp=!!=!===!====!!!!!!\n[ 161.1s] wrote runs/bench\\solutions\\6e43a08ec05a.py from framing 'adversarial' -> verified_against_reference\n[ 161.1s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, literal} | {edgefirst, traps} | {plain, restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "adversarial",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal"
+   ],
+   "!!=!===!====!!!!!!": [
+    "traps",
+    "edgefirst"
+   ],
+   "!!=!===!====!!!!=!": [
+    "restate",
+    "plain"
+   ],
+   "============!=!!=!": [
+    "complexity"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 2,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, literal} | {edgefirst, traps} | {plain, restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1046.236,
+  "_candidates": [
+   {
+    "framing": "adversarial",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 14,
+    "disagree": 4,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 9,
+    "disagree": 9,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 9,
+    "disagree": 9,
+    "compiled": true
+   },
+   {
+    "framing": "edgefirst",
+    "agree": 8,
+    "disagree": 10,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 8,
+    "disagree": 10,
+    "compiled": true
+   }
+  ]
+ },
+ {
+  "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+  "short": "6eca8a9120e0",
+  "language": "python",
+  "entrypoint": "capture_binders",
+  "deadline_s": 300.0,
+  "exit_code": 0,
+  "elapsed_s": 171.0,
+  "within_deadline": true,
+  "solution_written": true,
+  "solution_bytes": 5812,
+  "stderr_tail": "[ 170.8s]   traps        agree=13  disagree=5   crash=0 timeout=0 fp======!=!!!!=======\n[ 170.8s] wrote runs/bench\\solutions\\6eca8a9120e0.py from framing 'edgefirst' -> verified_against_reference\n[ 170.8s] AMBIGUITY: Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate} | {traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "status": "verified_against_reference",
+  "final_candidate": "edgefirst",
+  "traps": 6,
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "generator_error": null,
+  "notes": [],
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "restate",
+    "edgefirst",
+    "plain"
+   ],
+   "=====!=!!!!=======": [
+    "traps"
+   ],
+   "XXXXXXXXXXXXXXXXXX": [
+    "complexity"
+   ]
+  },
+  "candidates_total": 7,
+  "candidates_agreeing": 5,
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate} | {traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "model_calls": 10,
+  "model_seconds": 1065.984,
+  "_candidates": [
+   {
+    "framing": "edgefirst",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "adversarial",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "literal",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "restate",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "plain",
+    "agree": 18,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "complexity",
+    "agree": 0,
+    "disagree": 0,
+    "compiled": true
+   },
+   {
+    "framing": "traps",
+    "agree": 13,
+    "disagree": 5,
+    "compiled": true
+   }
+  ]
+ }
+]

@@ -1,0 +1,367 @@
+{
+ "problem_id": "4e49a099fd84fad956c856b0bb613db05b87316550730c4ac1329a2f26775465",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T03:12:33",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 203.39,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 203.39,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "4e49a099fd84fad956c856b0bb613db05b87316550730c4ac1329a2f26775465",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Partition a UTF-8 string into custom-graphemes via 6 boundary rules, output grapheme indices as UTF-16 offsets, and find longest common suffix match.",
+  "traps": [
+   {
+    "kind": "UNITS",
+    "quote": "output the UTF-16 offsets of boundaries i,j... A scalar at most U+FFFF occupies one UTF-16 code unit; a larger scalar occupies two.",
+    "consequence": "Outputs byte offsets or UTF-8 positions instead of UTF-16 code-unit offsets, causing wrong answers for strings with emoji.",
+    "guard": "Track each grapheme boundary's UTF-8 byte position; decode scalars to count 1 or 2 UTF-16 units per scalar."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "For each internal gap between adjacent Unicode scalar values, apply the first matching rule... rule order is authoritative.",
+    "consequence": "Merges rule conditions or checks all rules instead of stopping at first match, causing false boundaries or missing boundaries.",
+    "guard": "Implement if-else-if chain: check rules 1, 2, 3, 4, 5 in order; stop on first true condition; use rule 6 as catch-all."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "If the left scalar is U+200D, the right scalar is an Emoji, and the nearest scalar before that U+200D after skipping Attachments is an Emoji, there is no boundary.",
+    "consequence": "Fails to skip Attachments when looking backward from U+200D, or misidentifies Emoji ranges, causing wrong boundaries.",
+    "guard": "When left is U+200D and right is Emoji: walk backward from U+200D skipping Attachment ranges, check final scalar is Emoji."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "If both scalars are Regional Indicators, count the consecutive Regional Indicators ending at the left scalar. There is no boundary exactly when that count is odd.",
+    "consequence": "Miscounts consecutive RI by starting from wrong position or not including left scalar, giving wrong parity check.",
+    "guard": "Count RI by walking backward from left scalar (inclusive) until hitting non-RI; apply no-boundary iff count is odd."
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "resolve an index x to x when nonnegative and G+x when negative, then clamp it to [0,G]",
+    "consequence": "Clamps before resolving, or clamps to [1,G], causing invalid grapheme indices and wrong query results.",
+    "guard": "First compute resolved = (x if x >= 0 else G+x); then clamp(resolved, 0, G); apply this to both query indices."
+   },
+   {
+    "kind": "COMPLEXITY",
+    "quote": "for every 0<=k<L, grapheme i+k and grapheme j+k have identical UTF-8 byte sequences... 600,000 bytes and 300,000 queries",
+    "consequence": "Naive byte-by-byte comparison per query gives O(Q*L*bytes) ≈ O(10^11), timing out.",
+    "guard": "Precompute grapheme boundaries and byte ranges; for each query, iterate in O(L) comparing byte ranges; handle early exit."
+   }
+  ],
+  "input_shape": "UTF-8 string S (no ASCII whitespace, ≤600KB), then Q (≤300K) queries with signed i64 indices.",
+  "output_shape": "Two decimal integers per query: UTF-16 offsets or match length and byte count.",
+  "invariants": [
+   "Grapheme boundaries indexed [0,G]; negative indices resolve to G+x before clamping.",
+   "Rules 1-6 applied in order; first match stops evaluation, no merging of conditions.",
+   "UTF-16 offset = count of code units: U+0000..U+FFFF = 1 unit, U+10000+ = 2 units."
+  ],
+  "max_scale": "600,000 UTF-8 bytes, 300,000 queries, grapheme count up to ~600,000."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.079
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   }
+  ]
+ },
+ "final_candidate": "complexity",
+ "output_path": "runs/bench\\solutions\\4e49a099fd84.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 213.609,
+  "remaining_s": 86.391,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 203.375
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 10.219
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1182.937,
+  "prompt_chars_total": 35379,
+  "output_chars_total": 41076,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 78.84399999998277,
+    "prompt_chars": 3002,
+    "output_chars": 3908,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 87.82799999997951,
+    "prompt_chars": 3162,
+    "output_chars": 4378,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 88.03099999995902,
+    "prompt_chars": 3069,
+    "output_chars": 4248,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 89.35999999998603,
+    "prompt_chars": 3218,
+    "output_chars": 3466,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "4e49a099",
+    "ok": true,
+    "latency_s": 103.15599999995902,
+    "prompt_chars": 5628,
+    "output_chars": 3546,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 104.21899999998277,
+    "prompt_chars": 3536,
+    "output_chars": 3616,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 132.81199999997625,
+    "prompt_chars": 4734,
+    "output_chars": 4215,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 135.48399999999674,
+    "prompt_chars": 3091,
+    "output_chars": 5254,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 159.85899999999674,
+    "prompt_chars": 2769,
+    "output_chars": 4526,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 203.34399999998277,
+    "prompt_chars": 3170,
+    "output_chars": 3919,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

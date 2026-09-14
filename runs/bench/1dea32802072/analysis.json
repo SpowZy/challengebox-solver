@@ -1,0 +1,52 @@
+{
+ "problem_id": "1dea328020722d9c3737e123e64dafc670e9bcbc8a9e0d3163eb6352fa2d9710",
+ "language": "python",
+ "entrypoint": "track_indicator",
+ "summary": "Tracks indicator index of a selected tab in an ordered strip through insert, remove, and reverse operations.",
+ "traps": [
+  {
+   "kind": "REDEFINITION",
+   "quote": "An existing selection remains attached to the same identifier.",
+   "consequence": "Tracking selection as position causes wrong index after insert/remove/reverse change positions.",
+   "guard": "Track which identifier is selected, not its position; map to position when needed."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "use the order immediately before this operation... select the first surviving tab to its right",
+   "consequence": "Cannot determine which tabs are to the right without pre-removal positions and order.",
+   "guard": "Record pre-removal order and positions before any removals; find survivors by original index."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "Remove them simultaneously.",
+   "consequence": "Wrong selection if selection rule applied after each removal instead of once at end.",
+   "guard": "Remove all identifiers atomically; apply selection rule once after all are removed."
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "If the strip was empty, the first inserted identifier becomes selected.",
+   "consequence": "Empty strip after insert remains unselected instead of selecting the first inserted ID.",
+   "guard": "Check if strip was empty before insert; select first inserted ID if so."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "After every operation, append the current indicator index to the result",
+   "consequence": "Returning initial index as first element even with zero operations; wrong output shape.",
+   "guard": "Build result list only by appending after each operation; will be empty if none."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "positions from `left` through `right - 1`",
+   "consequence": "Off-by-one reversal error leaves all positions wrong after reverse operation.",
+   "guard": "Reverse positions [left, right) with right as exclusive upper bound; use correct indexing."
+  }
+ ],
+ "input_shape": "initial_ids (list of distinct int64), selected_index (int), operations (list of tuples). Max 300K total identifiers, 200K operations.",
+ "output_shape": "List of integers: indicator index after each operation, or -1 if no tab selected.",
+ "invariants": [
+  "Selection attaches to an identifier, not a position; remains the same identifier through all operations.",
+  "Empty strip is represented by selected_index = -1; becomes selected on first insert.",
+  "All identifiers are globally distinct; previously removed identifiers cannot be re-inserted."
+ ],
+ "max_scale": "300,000 total identifiers across initial_ids and all inserts; 200,000 operations; reverse ranges unbounded."
+}

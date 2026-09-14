@@ -1,0 +1,386 @@
+{
+ "problem_id": "5d02bd0e16ab63c540232452b60e8e6cf36d01e0820cb6b422b63c1a31091718",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T04:31:28",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 156.48,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 156.48,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "5d02bd0e16ab63c540232452b60e8e6cf36d01e0820cb6b422b63c1a31091718",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Simulator for a demand-aware queue with multiple producer versions and branching ancestry.",
+  "traps": [
+   {
+    "kind": "MEMORY",
+    "quote": "Operation `i` creates version `i` from earlier version `b`; versions may branch. N,Q <= 150000",
+    "consequence": "Materializing complete O(N)-sized snapshots for all Q versions requires O(Q×N) memory, exceeding limits.",
+    "guard": "Reconstruct version state from operation ancestry on demand; do not store full snapshots."
+   },
+   {
+    "kind": "MAGNITUDE",
+    "quote": "`r` is unique integer in `0..1000000006` congruent to signed value modulo 1000000007.",
+    "consequence": "Using x % MOD directly for negative x produces negative r, yielding wrong hash values.",
+    "guard": "Use formula ((x % MOD) + MOD) % MOD to ensure r stays in [0, MOD)."
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "N one-shot producers and queue tickets `0..N-1`. ... Producer IDs are `1..N`.",
+    "consequence": "Confusing 1-indexed producer IDs with 0-indexed tickets causes off-by-one errors in slot access.",
+    "guard": "Keep producer IDs 1-indexed; queue and tickets 0-indexed; translate carefully at each use."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "Unpublished slot stops draining. Value consumed only if `d>0`; then `c` advances. If `d=0`, stops before.",
+    "consequence": "Checking demand before unpublished, or merging rules, consumes values that should block draining.",
+    "guard": "Check unpublished first (immediate stop); only for values, test d>0; stop before consuming if d=0."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "COMPLETE if `p=c=N`; WAITING if `c=p<N`; BLOCKED if `c<p` unpublished; BACKPRESSURE if value d=0.",
+    "consequence": "Checking status conditions out of listed order or merging them outputs wrong status strings.",
+    "guard": "Determine status by checking conditions in order; halt at first match (COMPLETE → WAITING → BLOCKED → BACKPRESSURE)."
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "For every `P`, print: `DRAIN m h status p c d` using the resulting state.",
+    "consequence": "Wrong token order, leading zeros in numbers, or omitted fields causes all outputs to fail token comparison.",
+    "guard": "Print one space-separated line per drain: DRAIN m h status p c d with numbers unpadded in decimal."
+   }
+  ],
+  "input_shape": "N producers and Q operations. Each operation creates a version from an earlier base version, with commands to reserve producers, publish values, add demand, or drain the queue.",
+  "output_shape": "For each drain operation: one line with token count, hash, status, and final state (p c d).",
+  "invariants": [
+   "Producer IDs are 1-indexed (1..N); queue tickets and indices are 0-indexed (0..N-1).",
+   "Versions form a DAG; each operation builds from an earlier version, possibly branching.",
+   "Drain consumes slots in order starting at c, stopping on unpublished or (value with d=0)."
+  ],
+  "max_scale": "N=150000, Q=150000, each operation O(N) state; demand up to 10^18."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "edgefirst"
+   ],
+   "!!!!!===!!!=!!!!!!": [
+    "restate"
+   ],
+   "========!!==!!!!!!": [
+    "complexity"
+   ],
+   "======XXXXXXXXXXXX": [
+    "plain"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, traps} | {restate} | {complexity} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.187
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 12,
+    "timed_out": 0,
+    "behaviour": "======XXXXXXXXXXXX",
+    "gates": {
+     "compile": true,
+     "no_crash": false,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.062
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 8,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "========!!==!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#2991",
+     "input": "5 18\nR 0 5\nR 1 1\nR 2 4\nW 3 1 E\nP 4\nD 5 525\nP 6\nD 7 830\nW 8 4 V 21588\nP 9\nW 10 5 V -18577\nD 11 544\nP 12\nP 13\nP 14\nP 15\nR 16 3\nW 17 3 E",
+     "oracle": "DRAIN 0 0 BLOCKED 3 0 0\nDRAIN 0 0 BLOCKED 3 0 525\nDRAIN 0 0 BLOCKED 3 0 1355\nDRAIN 2 250725734 WAITING 3 3 1897\nDRAIN 0 0 WAITING 3 3 1897\nDRAIN 0 0 WAITING 3 3 1897\nDRAIN 0 0 WAITING 3 3 1897\n",
+     "candidate": "DRAIN 0 0 BLOCKED 3 0 0\nDRAIN 0 0 BLOCKED 3 0 525\nDRAIN 0 0 BLOCKED 3 0 1355\nDRAIN 2 250725734 WAITING 3 3 1897\nDRAIN 2 250725734 WAITING 3 3 1897\nDRAIN 2 250725734 WAITING 3 3 1897\nDRAIN 2 250725734 WAITING 3 3 1897\n"
+    },
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 4,
+    "disagree": 14,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!===!!!=!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "2 6\nR 0 1\nR 1 2\nW 2 1 E\nW 3 2 E\nD 4 0\nP 5",
+     "oracle": "DRAIN 0 0 COMPLETE 2 2 0\n",
+     "candidate": "DRAIN 2 0 COMPLETE 2 2 0\n"
+    },
+    "max_duration_s": 0.109
+   }
+  ]
+ },
+ "final_candidate": "traps",
+ "output_path": "runs/bench\\solutions\\5d02bd0e16ab.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 167.281,
+  "remaining_s": 132.719,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 156.469
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 10.796
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1165.895,
+  "prompt_chars_total": 33229,
+  "output_chars_total": 37001,
+  "detail": [
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 59.18800000002375,
+    "prompt_chars": 3321,
+    "output_chars": 4327,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 66.0,
+    "prompt_chars": 2955,
+    "output_chars": 2314,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 83.20400000002701,
+    "prompt_chars": 2947,
+    "output_chars": 4191,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 105.875,
+    "prompt_chars": 2876,
+    "output_chars": 4071,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 118.45400000002701,
+    "prompt_chars": 4519,
+    "output_chars": 3757,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 136.01600000000326,
+    "prompt_chars": 2787,
+    "output_chars": 3789,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 144.2970000000205,
+    "prompt_chars": 2854,
+    "output_chars": 3618,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "5d02bd0e",
+    "ok": true,
+    "latency_s": 145.09400000004098,
+    "prompt_chars": 5413,
+    "output_chars": 3116,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 151.329000000027,
+    "prompt_chars": 3003,
+    "output_chars": 3847,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 156.43800000002375,
+    "prompt_chars": 2554,
+    "output_chars": 3971,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

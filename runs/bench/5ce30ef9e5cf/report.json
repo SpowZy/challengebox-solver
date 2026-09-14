@@ -1,0 +1,372 @@
+{
+ "problem_id": "5ce30ef9e5cf1df58aaba388f1c3b0ea9fd24d1eb843d96bb1c6c5fd21396bc2",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T04:28:25",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 166.56,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 166.56,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "5ce30ef9e5cf1df58aaba388f1c3b0ea9fd24d1eb843d96bb1c6c5fd21396bc2",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Manage reversible object attribute overlays with activations that can be started, stopped, and queried.",
+  "traps": [
+   {
+    "kind": "PRECEDENCE",
+    "quote": "resolve its path after all preceding replacements in that same activation have been applied",
+    "consequence": "Using stale values when paths depend on other replacements in activation",
+    "guard": "Resolve each path immediately before applying replacement, seeing current state"
+   },
+   {
+    "kind": "RANGES",
+    "quote": "read and follow the object reference in every attribute except the last",
+    "consequence": "Following final attribute as reference instead of reading it as target cell",
+    "guard": "Follow L-1 attributes to reach target object, then read cell at attribute L"
+   },
+   {
+    "kind": "ORDERING",
+    "quote": "restore that activation's remembered writes in reverse replacement order",
+    "consequence": "Restored values applied in wrong order, overwriting each other incorrectly",
+    "guard": "When restoring, iterate replacements in reverse order"
+   },
+   {
+    "kind": "ORDERING",
+    "quote": "STOPALL stops all active activations from newest to oldest",
+    "consequence": "Restored values overwritten by subsequent restorations in wrong order",
+    "guard": "Stop activations in reverse order (newest/most-recent first)"
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "number of active activations followed by their IDs from oldest to newest on one line",
+    "consequence": "Wrong output format or ID order, failing test cases",
+    "guard": "Print count and IDs on same line, IDs in activation order (oldest first)"
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "Remembered paths are never resolved again",
+    "consequence": "Re-resolving paths gets different cells after other activations change values",
+    "guard": "Store resolved cell reference when remembering, restore to that cell"
+   }
+  ],
+  "input_shape": "N,K,Q bounds; K cells with object/attribute/kind/value; Q commands (START, STOP, STOPALL, GET, STACK)",
+  "output_shape": "GET outputs (I x or O x); STACK outputs (count and activation IDs on one line)",
+  "invariants": [
+   "Replacements in activation see effects of preceding replacements in same activation",
+   "Restoration must happen in reverse of replacement order within activation",
+   "STOPALL processes activations from newest to oldest, not oldest to newest"
+  ],
+  "max_scale": "N,K,Q ≤ 200k; total replacements ≤ 200k; sum path lengths ≤ 400k"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 6,
+  "oracle_unanswered": 12,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "======": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [
+   "thin evidence: the reference answered on only 6 of 18 generated inputs, so every agreement below rests on that many cases"
+  ],
+  "candidates": [
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.062
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.062
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 6,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   }
+  ]
+ },
+ "final_candidate": "restate",
+ "output_path": "runs/bench\\solutions\\5ce30ef9e5cf.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 183.296,
+  "remaining_s": 116.704,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 166.531
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 16.718
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1134.483,
+  "prompt_chars_total": 39919,
+  "output_chars_total": 44910,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 59.76600000000326,
+    "prompt_chars": 3616,
+    "output_chars": 5422,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 74.17200000002049,
+    "prompt_chars": 3624,
+    "output_chars": 2884,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 97.98399999999674,
+    "prompt_chars": 5188,
+    "output_chars": 4560,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 99.70300000003772,
+    "prompt_chars": 3545,
+    "output_chars": 4889,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 100.31200000003446,
+    "prompt_chars": 3990,
+    "output_chars": 3147,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 111.81200000003446,
+    "prompt_chars": 3456,
+    "output_chars": 4585,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 126.45300000003772,
+    "prompt_chars": 3523,
+    "output_chars": 5406,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "5ce30ef9",
+    "ok": true,
+    "latency_s": 132.89100000000326,
+    "prompt_chars": 6082,
+    "output_chars": 2577,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 164.90600000001723,
+    "prompt_chars": 3672,
+    "output_chars": 5372,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 166.48399999999674,
+    "prompt_chars": 3223,
+    "output_chars": 6068,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

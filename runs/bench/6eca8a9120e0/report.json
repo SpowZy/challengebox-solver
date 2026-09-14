@@ -1,0 +1,379 @@
+{
+ "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+ "language": "python",
+ "entrypoint": "capture_binders",
+ "started_at": "2026-09-14T04:36:57",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 153.39,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 153.39,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "6eca8a9120e08a6e5ef9287cd54499cb6e04ff87927037c5f656dc5e2ff4e08f",
+  "language": "python",
+  "entrypoint": "capture_binders",
+  "summary": "Identify declarations whose names appear free in replacements and occur on paths through those declarations in the expression DAG.",
+  "traps": [
+   {
+    "kind": "COMPLEXITY",
+    "quote": "Graph paths and replacement-tree depth may be linear in the node count.",
+    "consequence": "O(n²) naive algorithms timeout; 250k × path-length iterations exceeds time limits.",
+    "guard": "Design solution respecting DAG structure; avoid per-node iteration over all paths."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "a node may have multiple incoming child references. Its meaning for this task is its complete unfolding into a tree.",
+    "consequence": "Incorrect capture detection; same var node represents multiple distinct occurrences with different scopes.",
+    "guard": "Process all paths to each node or conceptually unfold DAG; do not process each node occurrence once."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "An original declaration is capturing if there exists at least one replaced occurrence such that: the occurrence's path crosses the scoped edge introducing that declaration, and the declaration's name is free in the replacement.",
+    "consequence": "Misidentified capturing declarations; only path crossing OR only free-in-replacement is insufficient.",
+    "guard": "Check both conditions for every replaced occurrence: scoped edge crossed AND name is free in replacement."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "A bind, let, or match term type defines distinct scope rules for declarations, body, and auxiliary terms.",
+    "consequence": "Wrong scope analysis; declarations applied over wrong subterms; incorrect capture detection.",
+    "guard": "Implement exact per-term-type scope rules; track which subterms fall under which declarations."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "Every auxiliary term uses the scope surrounding the whole `match`, not the arm's scope.",
+    "consequence": "Auxiliary terms incorrectly analyzed as if in arm scope; wrong declarations active.",
+    "guard": "Evaluate auxiliaries in outer match scope; do not include arm-local declarations in auxiliary scope."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "the declaration's name is free in the replacement",
+    "consequence": "False negatives or false positives; missing capture or over-reporting if free-variable analysis is incomplete.",
+    "guard": "Traverse entire replacement tree; identify all names bound by replacement's declarations and subtract from all names."
+   }
+  ],
+  "input_shape": "List of up to 250k term nodes; two roots; target name; max 500k child references and declaration edges; DAG may have paths of linear depth.",
+  "output_shape": "Python list of integers (declaration IDs), sorted in increasing order, or empty list.",
+  "invariants": [
+   "Expression root has no incoming reference; every other expression node has exactly one parent within its structure.",
+   "Replacement root has no parent; every other replacement node has exactly one parent within its structure.",
+   "Expression graph is acyclic; replacement tree is acyclic; both have disjoint reachable node sets."
+  ],
+  "max_scale": "250,000 total nodes across both structures; 500,000 child references plus declaration edges; linear graph depth."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "restate",
+    "edgefirst",
+    "plain"
+   ],
+   "=====!=!!!!=======": [
+    "traps"
+   ],
+   "XXXXXXXXXXXXXXXXXX": [
+    "complexity"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate} | {traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 18,
+    "timed_out": 0,
+    "behaviour": "XXXXXXXXXXXXXXXXXX",
+    "gates": {
+     "compile": true,
+     "no_crash": false,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 13,
+    "disagree": 5,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=====!=!!!!=======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#39924",
+     "input": "[[[\"var\", \"x\"], [\"var\", \"x\"], [\"bind\", [[1, \"x\"]], 1]], 2, \"x\", 0]",
+     "oracle": "[]",
+     "candidate": "[1]"
+    },
+    "max_duration_s": 0.11
+   }
+  ]
+ },
+ "final_candidate": "edgefirst",
+ "output_path": "runs/bench\\solutions\\6eca8a9120e0.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 170.797,
+  "remaining_s": 129.203,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 153.359
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 17.391
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1065.984,
+  "prompt_chars_total": 38985,
+  "output_chars_total": 47847,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 63.75,
+    "prompt_chars": 3519,
+    "output_chars": 5504,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "6eca8a91",
+    "ok": true,
+    "latency_s": 64.09399999998277,
+    "prompt_chars": 6026,
+    "output_chars": 3394,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 66.20299999997951,
+    "prompt_chars": 4299,
+    "output_chars": 3203,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 94.51600000000326,
+    "prompt_chars": 3303,
+    "output_chars": 4086,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 106.40600000001723,
+    "prompt_chars": 3463,
+    "output_chars": 4844,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 110.20299999997951,
+    "prompt_chars": 3508,
+    "output_chars": 5539,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 128.9220000000205,
+    "prompt_chars": 3370,
+    "output_chars": 6138,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 132.68699999997625,
+    "prompt_chars": 5035,
+    "output_chars": 5619,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 145.84399999998277,
+    "prompt_chars": 3392,
+    "output_chars": 5691,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 153.35899999999674,
+    "prompt_chars": 3070,
+    "output_chars": 3829,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

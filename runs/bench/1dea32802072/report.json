@@ -1,0 +1,405 @@
+{
+ "problem_id": "1dea328020722d9c3737e123e64dafc670e9bcbc8a9e0d3163eb6352fa2d9710",
+ "language": "python",
+ "entrypoint": "track_indicator",
+ "started_at": "2026-09-14T04:15:14",
+ "status": "emitted_unverified",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": false,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 144.44,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 144.44,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1dea328020722d9c3737e123e64dafc670e9bcbc8a9e0d3163eb6352fa2d9710",
+  "language": "python",
+  "entrypoint": "track_indicator",
+  "summary": "Tracks indicator index of a selected tab in an ordered strip through insert, remove, and reverse operations.",
+  "traps": [
+   {
+    "kind": "REDEFINITION",
+    "quote": "An existing selection remains attached to the same identifier.",
+    "consequence": "Tracking selection as position causes wrong index after insert/remove/reverse change positions.",
+    "guard": "Track which identifier is selected, not its position; map to position when needed."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "use the order immediately before this operation... select the first surviving tab to its right",
+    "consequence": "Cannot determine which tabs are to the right without pre-removal positions and order.",
+    "guard": "Record pre-removal order and positions before any removals; find survivors by original index."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "Remove them simultaneously.",
+    "consequence": "Wrong selection if selection rule applied after each removal instead of once at end.",
+    "guard": "Remove all identifiers atomically; apply selection rule once after all are removed."
+   },
+   {
+    "kind": "DEGENERATE",
+    "quote": "If the strip was empty, the first inserted identifier becomes selected.",
+    "consequence": "Empty strip after insert remains unselected instead of selecting the first inserted ID.",
+    "guard": "Check if strip was empty before insert; select first inserted ID if so."
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "After every operation, append the current indicator index to the result",
+    "consequence": "Returning initial index as first element even with zero operations; wrong output shape.",
+    "guard": "Build result list only by appending after each operation; will be empty if none."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "positions from `left` through `right - 1`",
+    "consequence": "Off-by-one reversal error leaves all positions wrong after reverse operation.",
+    "guard": "Reverse positions [left, right) with right as exclusive upper bound; use correct indexing."
+   }
+  ],
+  "input_shape": "initial_ids (list of distinct int64), selected_index (int), operations (list of tuples). Max 300K total identifiers, 200K operations.",
+  "output_shape": "List of integers: indicator index after each operation, or -1 if no tab selected.",
+  "invariants": [
+   "Selection attaches to an identifier, not a position; remains the same identifier through all operations.",
+   "Empty strip is represented by selected_index = -1; becomes selected on first insert.",
+   "All identifiers are globally distinct; previously removed identifiers cannot be re-inserted."
+  ],
+  "max_scale": "300,000 total identifiers across initial_ids and all inserts; 200,000 operations; reverse ranges unbounded."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "!!!!!!!!!!!!!!!!!!": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "framing_divergence": false,
+  "ambiguity_note": "",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 0,
+    "disagree": 18,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!!!!!!!!!!!!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], 0, [[\"insert\", 0, [2, 3]], [\"remove\", [2]]]]",
+     "oracle": "[0, 2, 1]",
+     "candidate": "[2, 1]"
+    },
+    "max_duration_s": 0.11
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/bench\\solutions\\1dea32802072.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 161.328,
+  "remaining_s": 138.672,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 144.406
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 16.891
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 637.549,
+  "prompt_chars_total": 32213,
+  "output_chars_total": 24901,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 29.81299999996554,
+    "prompt_chars": 2842,
+    "output_chars": 1511,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 40.31299999996554,
+    "prompt_chars": 2715,
+    "output_chars": 1607,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 41.15599999995902,
+    "prompt_chars": 2393,
+    "output_chars": 2425,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 42.25,
+    "prompt_chars": 2831,
+    "output_chars": 2930,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 48.75,
+    "prompt_chars": 2786,
+    "output_chars": 1604,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 56.31299999996554,
+    "prompt_chars": 4358,
+    "output_chars": 1588,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 62.35999999998603,
+    "prompt_chars": 2626,
+    "output_chars": 1622,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 73.84399999998277,
+    "prompt_chars": 3617,
+    "output_chars": 7046,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 98.34399999998277,
+    "prompt_chars": 2693,
+    "output_chars": 1715,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "1dea3280",
+    "ok": true,
+    "latency_s": 144.40599999995902,
+    "prompt_chars": 5352,
+    "output_chars": 2853,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

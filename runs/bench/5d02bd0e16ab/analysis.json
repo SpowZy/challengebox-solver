@@ -1,0 +1,52 @@
+{
+ "problem_id": "5d02bd0e16ab63c540232452b60e8e6cf36d01e0820cb6b422b63c1a31091718",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "Simulator for a demand-aware queue with multiple producer versions and branching ancestry.",
+ "traps": [
+  {
+   "kind": "MEMORY",
+   "quote": "Operation `i` creates version `i` from earlier version `b`; versions may branch. N,Q <= 150000",
+   "consequence": "Materializing complete O(N)-sized snapshots for all Q versions requires O(Q×N) memory, exceeding limits.",
+   "guard": "Reconstruct version state from operation ancestry on demand; do not store full snapshots."
+  },
+  {
+   "kind": "MAGNITUDE",
+   "quote": "`r` is unique integer in `0..1000000006` congruent to signed value modulo 1000000007.",
+   "consequence": "Using x % MOD directly for negative x produces negative r, yielding wrong hash values.",
+   "guard": "Use formula ((x % MOD) + MOD) % MOD to ensure r stays in [0, MOD)."
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "N one-shot producers and queue tickets `0..N-1`. ... Producer IDs are `1..N`.",
+   "consequence": "Confusing 1-indexed producer IDs with 0-indexed tickets causes off-by-one errors in slot access.",
+   "guard": "Keep producer IDs 1-indexed; queue and tickets 0-indexed; translate carefully at each use."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "Unpublished slot stops draining. Value consumed only if `d>0`; then `c` advances. If `d=0`, stops before.",
+   "consequence": "Checking demand before unpublished, or merging rules, consumes values that should block draining.",
+   "guard": "Check unpublished first (immediate stop); only for values, test d>0; stop before consuming if d=0."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "COMPLETE if `p=c=N`; WAITING if `c=p<N`; BLOCKED if `c<p` unpublished; BACKPRESSURE if value d=0.",
+   "consequence": "Checking status conditions out of listed order or merging them outputs wrong status strings.",
+   "guard": "Determine status by checking conditions in order; halt at first match (COMPLETE → WAITING → BLOCKED → BACKPRESSURE)."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "For every `P`, print: `DRAIN m h status p c d` using the resulting state.",
+   "consequence": "Wrong token order, leading zeros in numbers, or omitted fields causes all outputs to fail token comparison.",
+   "guard": "Print one space-separated line per drain: DRAIN m h status p c d with numbers unpadded in decimal."
+  }
+ ],
+ "input_shape": "N producers and Q operations. Each operation creates a version from an earlier base version, with commands to reserve producers, publish values, add demand, or drain the queue.",
+ "output_shape": "For each drain operation: one line with token count, hash, status, and final state (p c d).",
+ "invariants": [
+  "Producer IDs are 1-indexed (1..N); queue tickets and indices are 0-indexed (0..N-1).",
+  "Versions form a DAG; each operation builds from an earlier version, possibly branching.",
+  "Drain consumes slots in order starting at c, stopping on unpublished or (value with d=0)."
+ ],
+ "max_scale": "N=150000, Q=150000, each operation O(N) state; demand up to 10^18."
+}

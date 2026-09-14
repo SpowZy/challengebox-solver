@@ -1,0 +1,52 @@
+{
+ "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "Transmit Unicode text in byte-limited chunks with headers, respecting segment boundaries and budget constraints.",
+ "traps": [
+  {
+   "kind": "MAGNITUDE",
+   "quote": "The request budget B limits total wire bytes: payload bytes plus headers.",
+   "consequence": "Computing chunks * H overflows i64 when both values are near 10^18 bounds.",
+   "guard": "Recognize worst case: N segments, each its own chunk; use u64 or overflow-safe arithmetic for wire_bytes."
+  },
+  {
+   "kind": "RANGES",
+   "quote": "A chunk cannot cross a source-segment boundary. Reaching that boundary closes it.",
+   "consequence": "Chunks span segments if boundaries are not forced to close; wrong character and chunk counts.",
+   "guard": "Compute segment boundaries as cumulative character positions; force chunk closure when last char of segment is reached."
+  },
+  {
+   "kind": "UNITS",
+   "quote": "Next S positive integers: source-segment lengths whose sum is N.",
+   "consequence": "Treating segment lengths as byte counts instead of character counts shifts all boundary positions.",
+   "guard": "Segment lengths are character counts matching N; accumulate as character positions, not bytes."
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "If this would exceed B, stop before that character. A header is never sent without at least one character.",
+   "consequence": "Outputting non-zero chunks, payload, or wire_bytes when first character + header exceeds B.",
+   "guard": "Check if width(L) + H > B before any transmission; if true, set last=0, chunks=0, cause=LIMIT immediately."
+  },
+  {
+   "kind": "PRECEDENCE",
+   "quote": "Before sending a character, include its payload width and, if it would begin a new chunk, one header. If this would exceed B, stop before that character.",
+   "consequence": "Off-by-one: transmitting one character too many or too few if budget check uses >= instead of >.",
+   "guard": "Check current_wire + char_width + (H if new_chunk) > B strictly; stop if true without sending character."
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "with one-based positions and 1 <= L <= R <= N",
+   "consequence": "Off-by-one errors in converting one-based L, R to zero-based array indices; wrong character range processed.",
+   "guard": "Consistently convert L, R to zero-based by subtracting 1; document and verify at every access point."
+  }
+ ],
+ "input_shape": "Character count N, segment count S, query count Q, chunk size C, header cost H, budget B; characters as hex; segment lengths summing to N; queries with one-based range [L,R] and budget.",
+ "output_shape": "Seven space-separated integers per query: payload_bytes wire_bytes characters last chunks last_chunk_payload_bytes cause.",
+ "invariants": [
+  "Segment boundary forces chunk closure even if chunk not full.",
+  "No chunk spans a segment boundary or exceeds C payload bytes.",
+  "Header H is charged once per chunk; stop if adding next character exceeds budget B."
+ ],
+ "max_scale": "N=500k, Q=500k, C=10^18, H=10^18, B=10^18"
+}

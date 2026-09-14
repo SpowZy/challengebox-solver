@@ -1,0 +1,374 @@
+{
+ "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T03:04:15",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 173.97,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 173.97,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Transmit Unicode text in byte-limited chunks with headers, respecting segment boundaries and budget constraints.",
+  "traps": [
+   {
+    "kind": "MAGNITUDE",
+    "quote": "The request budget B limits total wire bytes: payload bytes plus headers.",
+    "consequence": "Computing chunks * H overflows i64 when both values are near 10^18 bounds.",
+    "guard": "Recognize worst case: N segments, each its own chunk; use u64 or overflow-safe arithmetic for wire_bytes."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "A chunk cannot cross a source-segment boundary. Reaching that boundary closes it.",
+    "consequence": "Chunks span segments if boundaries are not forced to close; wrong character and chunk counts.",
+    "guard": "Compute segment boundaries as cumulative character positions; force chunk closure when last char of segment is reached."
+   },
+   {
+    "kind": "UNITS",
+    "quote": "Next S positive integers: source-segment lengths whose sum is N.",
+    "consequence": "Treating segment lengths as byte counts instead of character counts shifts all boundary positions.",
+    "guard": "Segment lengths are character counts matching N; accumulate as character positions, not bytes."
+   },
+   {
+    "kind": "DEGENERATE",
+    "quote": "If this would exceed B, stop before that character. A header is never sent without at least one character.",
+    "consequence": "Outputting non-zero chunks, payload, or wire_bytes when first character + header exceeds B.",
+    "guard": "Check if width(L) + H > B before any transmission; if true, set last=0, chunks=0, cause=LIMIT immediately."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "Before sending a character, include its payload width and, if it would begin a new chunk, one header. If this would exceed B, stop before that character.",
+    "consequence": "Off-by-one: transmitting one character too many or too few if budget check uses >= instead of >.",
+    "guard": "Check current_wire + char_width + (H if new_chunk) > B strictly; stop if true without sending character."
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "with one-based positions and 1 <= L <= R <= N",
+    "consequence": "Off-by-one errors in converting one-based L, R to zero-based array indices; wrong character range processed.",
+    "guard": "Consistently convert L, R to zero-based by subtracting 1; document and verify at every access point."
+   }
+  ],
+  "input_shape": "Character count N, segment count S, query count Q, chunk size C, header cost H, budget B; characters as hex; segment lengths summing to N; queries with one-based range [L,R] and budget.",
+  "output_shape": "Seven space-separated integers per query: payload_bytes wire_bytes characters last chunks last_chunk_payload_bytes cause.",
+  "invariants": [
+   "Segment boundary forces chunk closure even if chunk not full.",
+   "No chunk spans a segment boundary or exceeds C payload bytes.",
+   "Header H is charged once per chunk; stop if adding next character exceeds budget B."
+  ],
+  "max_scale": "N=500k, Q=500k, C=10^18, H=10^18, B=10^18"
+ },
+ "verification": {
+  "cases": 10,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {
+   "==!=======": [
+    "adversarial"
+   ],
+   "==========": [
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity",
+    "plain"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial} | {complexity, edgefirst, literal, plain, restate, traps}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.079
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.093
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 10,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 9,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==!=======",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#64795",
+     "input": "1 1 3 10 0\n41\n1\n1 1 100\n1 1 0\n1 1 1",
+     "oracle": "1 1 1 1 1 1 END\n0 0 0 0 0 0 LIMIT\n1 1 1 1 1 1 END\n",
+     "candidate": "1 1 1 1 1 1 END\n0 0 0 0 0 0 END\n1 1 1 1 1 1 END\n"
+    },
+    "max_duration_s": 0.094
+   }
+  ]
+ },
+ "final_candidate": "traps",
+ "output_path": "runs/bench\\solutions\\1c182498c9c7.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 183.36,
+  "remaining_s": 116.64,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 173.953
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 9.391
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1333.917,
+  "prompt_chars_total": 36009,
+  "output_chars_total": 35659,
+  "detail": [
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 75.70299999997951,
+    "prompt_chars": 3599,
+    "output_chars": 4659,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 103.56199999997625,
+    "prompt_chars": 3225,
+    "output_chars": 4253,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 107.45299999997951,
+    "prompt_chars": 3233,
+    "output_chars": 3098,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "1c182498",
+    "ok": true,
+    "latency_s": 122.06199999997625,
+    "prompt_chars": 5691,
+    "output_chars": 3136,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 132.56199999997625,
+    "prompt_chars": 4797,
+    "output_chars": 3351,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 142.43699999997625,
+    "prompt_chars": 3132,
+    "output_chars": 2612,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 149.920999999973,
+    "prompt_chars": 3154,
+    "output_chars": 3387,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 155.96799999999348,
+    "prompt_chars": 2832,
+    "output_chars": 3904,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 170.31199999997625,
+    "prompt_chars": 3065,
+    "output_chars": 3536,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 173.93699999997625,
+    "prompt_chars": 3281,
+    "output_chars": 3723,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

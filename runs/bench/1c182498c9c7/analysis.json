@@ -1,0 +1,52 @@
+{
+ "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "Simulate transmitting a UTF-8 text range through byte-limited chunks with segment boundaries and budget constraints.",
+ "traps": [
+  {
+   "kind": "RANGES",
+   "quote": "A chunk cannot cross a source-segment boundary. Reaching that boundary closes it.",
+   "consequence": "Ignoring segment boundaries produces wrong chunk counts, wire_bytes, and last_chunk_payload.",
+   "guard": "Explicitly track segment end positions and close chunks when a segment ends, even if C is not reached."
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "one-based positions and... 1 <= L <= R <= N",
+   "consequence": "Off-by-one errors when converting between 1-based problem indices and 0-based arrays.",
+   "guard": "Consistently convert: problem position P maps to array index P-1; output last as problem position, not array index."
+  },
+  {
+   "kind": "MAGNITUDE",
+   "quote": "Rust wraps silently.",
+   "consequence": "Overflow during addition of wire_bytes contributions silently wraps to wrong values.",
+   "guard": "Use unsigned 64-bit types; carefully bound intermediate sums: (total + payload + H) must stay under 2×10^18."
+  },
+  {
+   "kind": "DEGENERATE",
+   "quote": "A header is never sent without at least one character. If this would exceed B, stop before that character.",
+   "consequence": "If budget is insufficient for first character (payload + header), output is last=0, chunks=0, with cause=LIMIT.",
+   "guard": "Before sending any character, check if payload + (H if starting chunk) ≤ B; if not, return early with zeroed counts."
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "Completing the requested range has cause `END`; every earlier stop has cause `LIMIT`.",
+   "consequence": "Misspelling 'END' or 'LIMIT' (e.g., 'FINISHED', 'DONE') fails exact output token comparison.",
+   "guard": "Output the exact strings 'END' or 'LIMIT' based on whether all characters in [L, R] were transmitted."
+  },
+  {
+   "kind": "UNITS",
+   "quote": "UTF-8, a value uses 1 byte for U+0000..U+007F, 2 for U+0080..U+07FF, 3 for U+0800..U+FFFF, and 4 otherwise.",
+   "consequence": "Confusing payload_bytes with character count: a 4-byte character adds 4 to payload_bytes, not 1.",
+   "guard": "Track payload_bytes as sum of per-character UTF-8 widths; track characters as count of characters sent."
+  }
+ ],
+ "input_shape": "N, S, Q, C, H; N hex Unicode scalars; S segment lengths; Q requests [L, R, B] with 1-based positions. Bounds: N,Q ≤ 500k; C ≤ 10^18; H,B ≤ 10^18.",
+ "output_shape": "Seven tokens per request: payload_bytes wire_bytes characters last chunks last_chunk_payload cause (END or LIMIT).",
+ "invariants": [
+  "A chunk respects both C (payload cap) and segment boundaries; whichever is reached first closes it.",
+  "Only nonempty chunks contribute headers; total wire_bytes = payload_bytes + (open_or_closed_chunks * H).",
+  "All positions L, R, and 'last' output are 1-based indices into the original text."
+ ],
+ "max_scale": "N=500,000 characters; S up to 500,000 segments; Q=500,000 requests; C and H up to 10^18."
+}

@@ -1,0 +1,377 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "started_at": "2026-09-14T04:09:46",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 134.64,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 134.64,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+  "language": "python",
+  "entrypoint": "simulate_writes",
+  "summary": "Simulate a congestion-aware retry mechanism with shared spin-credit tracking and implicit error handling.",
+  "traps": [
+   {
+    "kind": "MAGNITUDE",
+    "quote": "run-length encoded chronological list... run counts are at most `10^18`",
+    "consequence": "Expanding runs into an array causes memory/time explosion; algorithm becomes infeasible.",
+    "guard": "Process outcomes implicitly with run index and offset; never expand run counts."
+   },
+   {
+    "kind": "MAGNITUDE",
+    "quote": "cost = min(2**old_level, spin_limit) where level_cap <= 60",
+    "consequence": "Computing 2^59 or overflow produces wrong spin/yield counts without arbitrary precision.",
+    "guard": "Use full-precision arithmetic; compute 2^old_level directly for all comparisons and sums."
+   },
+   {
+    "kind": "COMPLEXITY",
+    "quote": "After all runs are exhausted, every later attempt implicitly returns `error`.",
+    "consequence": "Retry loops fail to terminate; infinite loops or wrong attempt counts.",
+    "guard": "Track outcome position; return implicit error when past last run; count these attempts."
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "packet is dropped immediately; that final 'full' causes no spin, yield, or credit deduction",
+    "consequence": "If conditions fail, credits/spins still deducted; level incorrectly reverts for next packets.",
+    "guard": "Check both conditions before any side effect; drop immediately if either fails; level persists."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "'error' fails the packet and resets the level to zero. Credits are unchanged.",
+    "consequence": "Incorrect final credits if they are reset on error instead of persisting.",
+    "guard": "On error: reset level only; never modify credits. Credits change only on 'ok' or 'full'."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "retries have already been scheduled for this packet ... max_retries applies per packet",
+    "consequence": "Global retry limit applied instead of per-packet; vastly more retries than intended.",
+    "guard": "Track retry_count per packet; check retry_count < max_retries for each packet independently."
+   }
+  ],
+  "input_shape": "Seven parameters: packet lengths (up to 200k), run-length encoded outcomes (up to 200k runs with counts 10^18), retry/level/spin limits, credit range.",
+  "output_shape": "Dictionary with 'packets' (status, retries, spins, yields per packet) and 'telemetry' (counters plus final level/credits).",
+  "invariants": [
+   "Each packet ends with exactly one status: INVALID, SENT, ERROR, or DROPPED.",
+   "Level always in [0, level_cap]; credits always in [0, credit_cap].",
+   "Retries are per-packet; max_retries applies individually, not globally."
+  ],
+  "max_scale": "200k packets; 200k outcome runs with 10^18 counts; level_cap 60; credit_cap 10^30."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "plain"
+   ],
+   "!!=====!!!=!!!=!=!": [
+    "complexity"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal, plain, restate, traps} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.14
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 8,
+    "disagree": 10,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "!!=====!!!=!!!=!=!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "edge#28539",
+     "input": "[[1], [[\"full\", 1]], 1, 10, 1000000000000000000, 1000000000000000000000000000000, 1000000000000000000000000000000]",
+     "oracle": "{\"packets\": [[\"ERROR\", 1, 1, 0]], \"telemetry\": {\"sent\": 0, \"dropped\": 0, \"errors\": 1, \"invalid\": 0, \"attempts\": 2, \"spins\": 1, \"yields\": 0, \"final_level\": 0, \"final_credits\": 999999999999999999999999999999}}",
+     "candidate": "{\"packets\": [[\"ERROR\", 1, 1, 0]], \"telemetry\": {\"sent\": 0, \"dropped\": 0, \"errors\": 1, \"invalid\": 0, \"attempts\": 2, \"spins\": 1, \"yields\": 0, \"final_level\": 1, \"final_credits\": 999999999999999999999999999999}}"
+    },
+    "max_duration_s": 0.125
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/bench\\solutions\\1ba0d34fae43.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 152.203,
+  "remaining_s": 147.797,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 134.61
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 17.562
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 895.926,
+  "prompt_chars_total": 36501,
+  "output_chars_total": 29222,
+  "detail": [
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 55.31300000002375,
+    "prompt_chars": 3054,
+    "output_chars": 2783,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 59.48499999998603,
+    "prompt_chars": 3214,
+    "output_chars": 2992,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 61.79700000002049,
+    "prompt_chars": 4786,
+    "output_chars": 2656,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 68.68800000002375,
+    "prompt_chars": 2821,
+    "output_chars": 2637,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 79.14100000000326,
+    "prompt_chars": 4096,
+    "output_chars": 4272,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 91.90700000000652,
+    "prompt_chars": 3121,
+    "output_chars": 2788,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 109.18800000002375,
+    "prompt_chars": 3270,
+    "output_chars": 2878,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 111.81300000002375,
+    "prompt_chars": 3143,
+    "output_chars": 2379,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 123.98399999999674,
+    "prompt_chars": 3259,
+    "output_chars": 2910,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "1ba0d34f",
+    "ok": true,
+    "latency_s": 134.60999999998603,
+    "prompt_chars": 5737,
+    "output_chars": 2927,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

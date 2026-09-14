@@ -1,0 +1,18 @@
+# Build and interpreter noise
+__pycache__/
+*.pyc
+.venv/
+target/
+
+# Compiled Rust candidates land in temp dirs, but catch strays
+*.pdb
+*.exe
+
+# Everything under runs/ is evidence and IS committed on purpose: the candidates, the
+# reference, the generated inputs, the reports and the analyses are what make RESULTS.md
+# checkable rather than assertable. Only the raw driver log is noise.
+runs/bench.log
+**/*.pkl
+
+# Scratch from building the thing, kept locally but not part of the deliverable
+runs/dev/

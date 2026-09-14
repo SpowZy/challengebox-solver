@@ -1,0 +1,52 @@
+{
+ "problem_id": "5cb294c18288f6ea4e50d59fd9831610232b6df28cc1a84b7d23e3d1eb5c7bb1",
+ "language": "python",
+ "entrypoint": "validate_build",
+ "summary": "Validates build operations on schema-backed records and arrays with flattened layouts",
+ "traps": [
+  {
+   "kind": "COMPLEXITY",
+   "quote": "Schema-reference and descriptor nesting are at most 60. Repetitions between 1 and 10^18",
+   "consequence": "Naive recursive schema flattening causes exponential expansion; OOMs on moderately complex inputs",
+   "guard": "Compute flattened field counts and positions algebraically without materializing full layouts"
+  },
+  {
+   "kind": "INDEXING",
+   "quote": "Return the 1-based index of the earliest invalid operation",
+   "consequence": "Uses 0-based indexing internally throughout; returns operation index off by one",
+   "guard": "Track operation numbers as 1-based from start or add 1 at return; preserve 0 and len(operations)+1 exactly"
+  },
+  {
+   "kind": "MAGNITUDE",
+   "quote": "Repetitions, capacities, and default counts are between 1 and 10^18",
+   "consequence": "Attempts to iterate through or allocate for 10^18 elements; catastrophic time and memory blowup",
+   "guard": "Track counts and positions algebraically; skip large ranges without iteration or allocation"
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Descriptor equality is recursive and includes schema indices and capacities",
+   "consequence": "Accepts partial descriptor matches; ignores schema index or capacity differences in nested descriptors",
+   "guard": "Recursively compare all descriptor components: element type, schema index, capacity, and further nesting"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "An array may be closed at any length. A record may be closed only when all flattened fields are filled",
+   "consequence": "Applies identical closure logic to both; rejects valid partial array closures or accepts incomplete record closures",
+   "guard": "Distinguish container type; arrays close unconditionally; records close only when all flattened fields filled"
+  },
+  {
+   "kind": "MEMORY",
+   "quote": "Flattened layouts may be enormous",
+   "consequence": "Attempts to construct or store full flattened layout for large schemas; exceeds available memory",
+   "guard": "Represent state as stack of open containers with current position; compute field offsets on demand"
+  }
+ ],
+ "input_shape": "schemas (layout terms), root (schema index), operations (commands); up to 200k schemas/operations, 300k layout nodes",
+ "output_shape": "Integer: 1-based index of first invalid operation, or 0 if all valid and closed, or len(operations)+1 if unclosed",
+ "invariants": [
+  "Flattened record layouts can have 10^18 fields; cannot be materialized in memory",
+  "Nested repeats with 60 levels of nesting require algebraic position computation",
+  "Return value is 1-based index for errors, with special cases 0 and len(operations)+1"
+ ],
+ "max_scale": "200k schemas, 200k operations, 60 nesting depth, 10^18 repetitions and capacities"
+}

@@ -1,0 +1,320 @@
+{
+ "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+ "language": "python",
+ "entrypoint": "simulate_writes",
+ "started_at": "2026-09-14T04:43:49",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 130.09,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 130.09,
+   "event": "wave",
+   "candidates": 4,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1ba0d34fae43f1d26c14f3091598291f0ca9d6ab3f88232d15a3322c017042c3",
+  "language": "python",
+  "entrypoint": "simulate_writes",
+  "summary": "Simulate a write worker with exponential backoff costs (2^level) and credit-based retry limits.",
+  "traps": [
+   {
+    "kind": "COMPLEXITY",
+    "quote": "run counts are at most `10**18`",
+    "consequence": "Naive O(run_count) iteration TLEs; must optimize exponential doubling implicitly",
+    "guard": "Calculate how many \"full\"s packet absorbs before level caps, credit exhausted, or max_retries hit; skip ahead"
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "A retry is counted when its next attempt is scheduled.",
+    "consequence": "Confusing 'attempts' (all tries) with 'retries' (scheduled new tries); dropped \"full\"s increment attempts but not retries",
+    "guard": "Track retries and attempts separately; only increment retries when retry is scheduled, not when it's dropped"
+   },
+   {
+    "kind": "RANGES",
+    "quote": "After all runs are exhausted, every later attempt implicitly returns `\"error\"`.",
+    "consequence": "Implicit errors after outcome list ends are not counted; telemetry totals wrong; missing error attempts",
+    "guard": "Track outcome stream position; after exhaustion, generate implicit errors for all remaining retries and packets"
+   },
+   {
+    "kind": "MAGNITUDE",
+    "quote": "`0 <= initial_credits <= credit_cap <= 10**30`",
+    "consequence": "Float arithmetic or i64 truncation loses precision; credit balance becomes negative or invalid",
+    "guard": "Use arbitrary-precision integers; never convert to float or fixed-width int"
+   },
+   {
+    "kind": "PRECEDENCE",
+    "quote": "only if fewer than `max_retries` retries AND current balance >= cost. If either condition fails, dropped immediately",
+    "consequence": "Dropping only on balance check, not max_retries check (or vice versa); retry counts or credit ledger wrong",
+    "guard": "Require both conditions true to retry; fail fast and drop if either is false; no partial retry"
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "`attempts` includes attempts receiving implicit errors",
+    "consequence": "Counting only explicit outcomes misses implicit errors after run exhaustion; final attempt count wrong",
+    "guard": "Count all attempts including those after outcomes exhausted; implicit errors are still attempts"
+   }
+  ],
+  "input_shape": "lists of packet lengths and run-length-encoded outcomes; bounds: packets ≤200k, outcomes ≤200k runs, credit_cap ≤10^30, level_cap ≤60, max_retries ≤10^18",
+  "output_shape": "dict with 'packets' (list of status, retries, spins, yields) and 'telemetry' dict (sent, dropped, errors, invalid, attempts, spins, yields, final_level, final_credits)",
+  "invariants": [
+   "Congestion level stays in [0, level_cap]; credit balance in [0, credit_cap]",
+   "Each outcome run item consumes exactly one attempt; a packet may consume multiple outcomes if retried",
+   "Cost = min(2^old_level, spin_limit) grows exponentially up to level_cap, then plateaus"
+  ],
+  "max_scale": "200,000 packets; 200,000 outcome runs with up to 10^18 items per run; credit_cap 10^30"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "==================": [
+    "adversarial",
+    "literal",
+    "edgefirst"
+   ],
+   "=======!!==!=!=!==": [
+    "restate"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, edgefirst, literal} | {restate}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 13,
+    "disagree": 5,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!!==!=!=!==",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#23061",
+     "input": "[[4753, 46318, 44703], [[\"full\", 1], [\"error\", 2]], 1, 60, 100, 901, 1000]",
+     "oracle": "{\"packets\": [[\"ERROR\", 1, 1, 0], [\"ERROR\", 0, 0, 0], [\"ERROR\", 0, 0, 0]], \"telemetry\": {\"sent\": 0, \"dropped\": 0, \"errors\": 3, \"invalid\": 0, \"attempts\": 4, \"spins\": 1, \"yields\": 0, \"final_level\": 0, \"final_credits\": 900}}",
+     "candidate": "{\"packets\": [[\"ERROR\", 1, 1, 0], [\"ERROR\", 0, 0, 0], [\"ERROR\", 0, 0, 0]], \"telemetry\": {\"sent\": 0, \"dropped\": 0, \"errors\": 3, \"invalid\": 0, \"attempts\": 4, \"spins\": 0, \"yields\": 0, \"final_level\": 0, \"final_credits\": 900}}"
+    },
+    "max_duration_s": 0.11
+   }
+  ]
+ },
+ "final_candidate": "adversarial",
+ "output_path": "runs/dev/p060.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 0.6,
+  "total_s": 180.0,
+  "elapsed_s": 141.907,
+  "remaining_s": 38.093,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 11.2,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 43.2,
+    "elapsed_s": 130.078
+   },
+   "verify": {
+    "allocated_s": 76.8,
+    "elapsed_s": 11.813
+   },
+   "adjudicate": {
+    "allocated_s": 28.8,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 3,
+  "latency_s_total": 889.027,
+  "prompt_chars_total": 36501,
+  "output_chars_total": 20371,
+  "detail": [
+   {
+    "role": "analyse",
+    "tag": "1ba0d34f",
+    "ok": true,
+    "latency_s": 56.60899999999674,
+    "prompt_chars": 5737,
+    "output_chars": 3114,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 59.40600000001723,
+    "prompt_chars": 3214,
+    "output_chars": 2939,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 67.07799999997951,
+    "prompt_chars": 4096,
+    "output_chars": 3594,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 70.01500000001397,
+    "prompt_chars": 3054,
+    "output_chars": 2551,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 74.67099999997299,
+    "prompt_chars": 3143,
+    "output_chars": 2740,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 75.98399999999674,
+    "prompt_chars": 3259,
+    "output_chars": 2852,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 95.125,
+    "prompt_chars": 3270,
+    "output_chars": 2581,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": false,
+    "latency_s": 130.03100000001723,
+    "prompt_chars": 3121,
+    "output_chars": 0,
+    "error": "timeout after 130.0s",
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": false,
+    "latency_s": 130.045999999973,
+    "prompt_chars": 2821,
+    "output_chars": 0,
+    "error": "timeout after 130.0s",
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": false,
+    "latency_s": 130.06199999997625,
+    "prompt_chars": 4786,
+    "output_chars": 0,
+    "error": "timeout after 130.0s",
+    "model": "haiku"
+   }
+  ]
+ }
+}

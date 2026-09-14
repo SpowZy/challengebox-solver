@@ -1,0 +1,52 @@
+{
+ "problem_id": "5ce30ef9e5cf1df58aaba388f1c3b0ea9fd24d1eb843d96bb1c6c5fd21396bc2",
+ "language": "rust",
+ "entrypoint": "main",
+ "summary": "Manages reversible overlays of object attribute replacements with independent activation scopes.",
+ "traps": [
+  {
+   "kind": "REDEFINITION",
+   "quote": "For each replacement, resolve its path after all preceding replacements in that same activation have been applied",
+   "consequence": "Solution pre-resolves all paths, gets wrong cells on tests where path depends on prior replacements",
+   "guard": "Resolve each path after all prior replacements in its activation are applied to state"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "STOPALL stops all active activations from newest to oldest. Each complete restoration occurs before the next",
+   "consequence": "Solution stops oldest-to-newest instead, leaves cells with values from wrong activation order",
+   "guard": "Stop from newest to oldest by reversing active activation queue order when processing STOPALL"
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "Each restoration writes the remembered value even if another activation later changed that cell",
+   "consequence": "Solution writes current cell value instead of remembered value, loses earlier overlay changes",
+   "guard": "Use remembered values from before each replacement, not current cell state during restoration"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "restore that activation's remembered writes in reverse replacement order",
+   "consequence": "Solution restores replacements forward instead of reverse, cell ends in wrong intermediate state",
+   "guard": "Reverse the replacement list when restoring, process from last replacement to first"
+  },
+  {
+   "kind": "MEMORY",
+   "quote": "Attributes are in 1..=10^9",
+   "consequence": "Solution indexes cells with array sized by attribute, crashes out-of-memory or panics",
+   "guard": "Use HashMap or BTreeMap keyed by (object, attribute) pair for sparse cell storage"
+  },
+  {
+   "kind": "REDEFINITION",
+   "quote": "The ID is guaranteed inactive before START, but may be reused after stopping",
+   "consequence": "Solution stores state per ID globally, merges independent activations with same reused ID",
+   "guard": "Track each activation separately by ID, allow ID reuse only after previous activation stops"
+  }
+ ],
+ "input_shape": "N, K, Q (≤200k); K initial cells; Q commands (START with total M ≤200k, STOP, STOPALL, GET, STACK); path length sum ≤400k",
+ "output_shape": "GET prints 'I value' or 'O value'; STACK prints activation count and IDs oldest-to-newest on one line",
+ "invariants": [
+  "Each cell is uniquely identified by (object, attribute); attributes span 1..=10^9",
+  "Paths resolve against current state at use time, not pre-computed or reused",
+  "Activation order determines restoration order: STOPALL goes newest-to-oldest"
+ ],
+ "max_scale": "200k objects, 200k cells, 200k commands; 200k total replacements; 400k total path length"
+}

@@ -1,0 +1,372 @@
+{
+ "problem_id": "4e49a099fd84fad956c856b0bb613db05b87316550730c4ac1329a2f26775465",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T04:21:31",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 215.09,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 215.09,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "4e49a099fd84fad956c856b0bb613db05b87316550730c4ac1329a2f26775465",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Partition UTF-8 string into graphemes by complex boundary rules; answer queries about grapheme sequences.",
+  "traps": [
+   {
+    "kind": "PRECEDENCE",
+    "quote": "apply the first matching rule ... rule order is authoritative",
+    "consequence": "Checking rules as accumulated conditions instead of first-match-wins produces wrong boundary positions.",
+    "guard": "Iterate rules 1–6 in order; stop at first match and skip all remaining rules."
+   },
+   {
+    "kind": "UNITS",
+    "quote": "broadcasts use UTF-16 code-unit offsets ... larger scalar occupies two UTF-16 code units",
+    "consequence": "Outputting byte or grapheme offsets instead of UTF-16 code-unit positions produces wrong query answers.",
+    "guard": "Precompute UTF-16 offset for every grapheme boundary; output offsets/distances in UTF-16 code units."
+   },
+   {
+    "kind": "COMPLEXITY",
+    "quote": "Constraints: |S| <= 600,000 UTF-8 bytes and 1 <= Q <= 300,000",
+    "consequence": "O(|S|) per query = 1.8×10^11 operations; solution times out.",
+    "guard": "Precompute all boundaries and UTF-16 offsets in O(|S|); answer queries in O(1)."
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "resolve index x to x when nonnegative and G+x when negative, then clamp to [0,G]",
+    "consequence": "Clamping before resolving negative indices produces out-of-range or wrong indices.",
+    "guard": "Resolve negative indices first (x → G+x), then clamp result to [0,G]."
+   },
+   {
+    "kind": "RANGES",
+    "quote": "If there are G graphemes, ... clamp it to [0,G]",
+    "consequence": "Assuming G boundaries instead of G+1 causes off-by-one errors.",
+    "guard": "Recall G graphemes produce G+1 boundaries, indexed 0 through G inclusive."
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "Controls are U+0000..U+001F and U+007F..U+009F",
+    "consequence": "Checking only U+0000..U+001F and missing U+007F..U+009F causes wrong boundaries on extended ASCII controls.",
+    "guard": "Implement control check for both ranges: ASCII (U+0000–U+001F) AND extended (U+007F–U+009F)."
+   }
+  ],
+  "input_shape": "UTF-8 string S (600KB max); Q queries (300K max) with signed 64-bit indices.",
+  "output_shape": "Two integers per query: UTF-16 offsets or code-unit counts.",
+  "invariants": [
+   "Boundaries determined by first matching of six numbered rules, not merged/accumulated conditions.",
+   "All output uses UTF-16 encoding: scalars > U+FFFF occupy two code units.",
+   "G graphemes produce G+1 boundaries indexed [0, G] inclusive."
+  ],
+  "max_scale": "600,000 UTF-8 bytes; 300,000 queries"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 17,
+  "oracle_unanswered": 1,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "=================": [
+    "adversarial",
+    "literal",
+    "traps",
+    "restate",
+    "edgefirst",
+    "complexity"
+   ],
+   "=========X=X=XX==": [
+    "plain"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, complexity, edgefirst, literal, restate, traps} | {plain}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.062
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.079
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.079
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 13,
+    "disagree": 0,
+    "crashed": 4,
+    "timed_out": 0,
+    "behaviour": "=========X=X=XX==",
+    "gates": {
+     "compile": true,
+     "no_crash": false,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.063
+   }
+  ]
+ },
+ "final_candidate": "edgefirst",
+ "output_path": "runs/bench\\solutions\\4e49a099fd84.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 225.609,
+  "remaining_s": 74.391,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 215.079
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 10.515
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1175.235,
+  "prompt_chars_total": 35379,
+  "output_chars_total": 39016,
+  "detail": [
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 46.96900000004098,
+    "prompt_chars": 3536,
+    "output_chars": 2096,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 58.90600000001723,
+    "prompt_chars": 3162,
+    "output_chars": 4876,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 67.25,
+    "prompt_chars": 3218,
+    "output_chars": 4615,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 69.45300000003772,
+    "prompt_chars": 3170,
+    "output_chars": 3445,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 113.70300000003772,
+    "prompt_chars": 3069,
+    "output_chars": 4059,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 118.82800000003772,
+    "prompt_chars": 3002,
+    "output_chars": 4304,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 141.18800000002375,
+    "prompt_chars": 4734,
+    "output_chars": 4213,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 159.32800000003772,
+    "prompt_chars": 3091,
+    "output_chars": 3702,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "4e49a099",
+    "ok": true,
+    "latency_s": 184.5470000000205,
+    "prompt_chars": 5628,
+    "output_chars": 2660,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 215.06300000002375,
+    "prompt_chars": 2769,
+    "output_chars": 5046,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

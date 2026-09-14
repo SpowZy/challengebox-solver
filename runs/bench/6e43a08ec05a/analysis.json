@@ -1,0 +1,52 @@
+{
+ "problem_id": "6e43a08ec05a97ff0489d2f75736b87e39e02d8691f594495efc6cd83b485c98",
+ "language": "python",
+ "entrypoint": "normalize_protection",
+ "summary": "Transform protected cell ranges after row and column insertions and deletions",
+ "traps": [
+  {
+   "kind": "INDEXING",
+   "quote": "1 <= index <= the relevant dimension",
+   "consequence": "Off-by-one errors in every row/column coordinate transformation",
+   "guard": "Recognize 1-based edit indices explicitly; convert carefully if using 0-based internally"
+  },
+  {
+   "kind": "COMPLEXITY",
+   "quote": "Do not enumerate individual worksheet cells or rows",
+   "consequence": "O(max_row × max_col) solution times out despite correct algorithm on large inputs",
+   "guard": "Use coordinate compression or interval tracking; never iterate over rows or materialize grid"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "Delete lines index through index+d-1. Cells in them disappear, later cells move by -d, and the final d lines become unprotected",
+   "consequence": "Rectangles overlapping deletion range not split; coordinates not adjusted; final rows incorrectly tracked",
+   "guard": "Split rectangles that span deleted range; shift later coordinates by -d; treat final d rows as unprotected"
+  },
+  {
+   "kind": "ORDERING",
+   "quote": "every maximal consecutive sequence of rows on which that exact maximal interval occurs becomes (first_row, c1, last_row, c2). Rectangles cannot be combined in any other way",
+   "consequence": "Rows merged across gaps or intervals merged incorrectly; output non-canonical",
+   "guard": "Merge only consecutive rows with identical maximal column interval; disallow any other combination"
+  },
+  {
+   "kind": "RANGES",
+   "quote": "cells moved beyond the fixed worksheet boundary are discarded",
+   "consequence": "Rectangles extend beyond [1, max_row] × [1, max_col]; output contains invalid coordinates",
+   "guard": "Clip all rectangle coordinates to [1, max_row] and [1, max_col] after each edit; discard empty results"
+  },
+  {
+   "kind": "OUTPUT",
+   "quote": "Sort the result lexicographically. Return [] for an empty union",
+   "consequence": "Output in arbitrary order or undefined behavior on empty set",
+   "guard": "Sort (r1,c1,r2,c2) tuples using default lexicographic ordering; handle empty result as []"
+  }
+ ],
+ "input_shape": "ranges: ≤30k inclusive (r1,c1,r2,c2) rects; edits: ≤30k of (axis, 1-based-index, delta); max_row, max_col ≤10^9",
+ "output_shape": "(r1,c1,r2,c2) tuples in canonical row-run form, lexicographically sorted; [] if empty",
+ "invariants": [
+  "Edits apply sequentially; each transforms all surviving rectangles",
+  "Protection moves with surviving cells; cells beyond boundaries disappear",
+  "Output cannot enumerate rows or cells; must use coordinate compression"
+ ],
+ "max_scale": "30k rectangles, 30k edits, dimensions 10^9, output ≤200k intervals"
+}

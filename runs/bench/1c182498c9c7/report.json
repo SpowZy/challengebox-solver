@@ -1,0 +1,393 @@
+{
+ "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+ "language": "rust",
+ "entrypoint": "main",
+ "started_at": "2026-09-14T04:12:18",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 166.25,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 166.25,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "1c182498c9c78c41c5b3b3e7cd6f51db7343e42da6950fd990380ebb61899db0",
+  "language": "rust",
+  "entrypoint": "main",
+  "summary": "Simulate transmitting a UTF-8 text range through byte-limited chunks with segment boundaries and budget constraints.",
+  "traps": [
+   {
+    "kind": "RANGES",
+    "quote": "A chunk cannot cross a source-segment boundary. Reaching that boundary closes it.",
+    "consequence": "Ignoring segment boundaries produces wrong chunk counts, wire_bytes, and last_chunk_payload.",
+    "guard": "Explicitly track segment end positions and close chunks when a segment ends, even if C is not reached."
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "one-based positions and... 1 <= L <= R <= N",
+    "consequence": "Off-by-one errors when converting between 1-based problem indices and 0-based arrays.",
+    "guard": "Consistently convert: problem position P maps to array index P-1; output last as problem position, not array index."
+   },
+   {
+    "kind": "MAGNITUDE",
+    "quote": "Rust wraps silently.",
+    "consequence": "Overflow during addition of wire_bytes contributions silently wraps to wrong values.",
+    "guard": "Use unsigned 64-bit types; carefully bound intermediate sums: (total + payload + H) must stay under 2×10^18."
+   },
+   {
+    "kind": "DEGENERATE",
+    "quote": "A header is never sent without at least one character. If this would exceed B, stop before that character.",
+    "consequence": "If budget is insufficient for first character (payload + header), output is last=0, chunks=0, with cause=LIMIT.",
+    "guard": "Before sending any character, check if payload + (H if starting chunk) ≤ B; if not, return early with zeroed counts."
+   },
+   {
+    "kind": "OUTPUT",
+    "quote": "Completing the requested range has cause `END`; every earlier stop has cause `LIMIT`.",
+    "consequence": "Misspelling 'END' or 'LIMIT' (e.g., 'FINISHED', 'DONE') fails exact output token comparison.",
+    "guard": "Output the exact strings 'END' or 'LIMIT' based on whether all characters in [L, R] were transmitted."
+   },
+   {
+    "kind": "UNITS",
+    "quote": "UTF-8, a value uses 1 byte for U+0000..U+007F, 2 for U+0080..U+07FF, 3 for U+0800..U+FFFF, and 4 otherwise.",
+    "consequence": "Confusing payload_bytes with character count: a 4-byte character adds 4 to payload_bytes, not 1.",
+    "guard": "Track payload_bytes as sum of per-character UTF-8 widths; track characters as count of characters sent."
+   }
+  ],
+  "input_shape": "N, S, Q, C, H; N hex Unicode scalars; S segment lengths; Q requests [L, R, B] with 1-based positions. Bounds: N,Q ≤ 500k; C ≤ 10^18; H,B ≤ 10^18.",
+  "output_shape": "Seven tokens per request: payload_bytes wire_bytes characters last chunks last_chunk_payload cause (END or LIMIT).",
+  "invariants": [
+   "A chunk respects both C (payload cap) and segment boundaries; whichever is reached first closes it.",
+   "Only nonempty chunks contribute headers; total wire_bytes = payload_bytes + (open_or_closed_chunks * H).",
+   "All positions L, R, and 'last' output are 1-based indices into the original text."
+  ],
+  "max_scale": "N=500,000 characters; S up to 500,000 segments; Q=500,000 requests; C and H up to 10^18."
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_answers": 18,
+  "oracle_unanswered": 0,
+  "oracle_error": null,
+  "generator_error": null,
+  "clusters": {
+   "=======!==========": [
+    "adversarial",
+    "traps",
+    "plain"
+   ],
+   "==================": [
+    "restate",
+    "edgefirst"
+   ],
+   "=======!====!!!!!!": [
+    "complexity"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, plain, traps} | {edgefirst, restate} | {complexity}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.094
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#23061",
+     "input": "14 1 12 9 0\nC 2D 424 F57F 2C 52 469 7D9 5C 9AFB 182 F0 325 3B0\n14\n1 6 61\n4 6 48\n13 14 3\n2 11 18\n13 13 79\n14 14 6\n14 14 38\n11 11 55\n1 3 64\n5 11 53\n9 11 62\n2 3 78",
+     "oracle": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 3 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 2 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n",
+     "candidate": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 6 18 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 3 12 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n"
+    },
+    "max_duration_s": 0.063
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#23061",
+     "input": "14 1 12 9 0\nC 2D 424 F57F 2C 52 469 7D9 5C 9AFB 182 F0 325 3B0\n14\n1 6 61\n4 6 48\n13 14 3\n2 11 18\n13 13 79\n14 14 6\n14 14 38\n11 11 55\n1 3 64\n5 11 53\n9 11 62\n2 3 78",
+     "oracle": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 3 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 2 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n",
+     "candidate": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 1 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 1 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n"
+    },
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!==========",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#23061",
+     "input": "14 1 12 9 0\nC 2D 424 F57F 2C 52 469 7D9 5C 9AFB 182 F0 325 3B0\n14\n1 6 61\n4 6 48\n13 14 3\n2 11 18\n13 13 79\n14 14 6\n14 14 38\n11 11 55\n1 3 64\n5 11 53\n9 11 62\n2 3 78",
+     "oracle": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 3 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 2 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n",
+     "candidate": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n8 8 5 6 1 8 LIMIT\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n7 7 5 9 1 7 LIMIT\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n"
+    },
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 11,
+    "disagree": 7,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "=======!====!!!!!!",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "small#23061",
+     "input": "14 1 12 9 0\nC 2D 424 F57F 2C 52 469 7D9 5C 9AFB 182 F0 325 3B0\n14\n1 6 61\n4 6 48\n13 14 3\n2 11 18\n13 13 79\n14 14 6\n14 14 38\n11 11 55\n1 3 64\n5 11 53\n9 11 62\n2 3 78",
+     "oracle": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n2 2 1 13 1 2 LIMIT\n18 18 10 11 3 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 2 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n",
+     "candidate": "9 9 6 6 1 9 END\n5 5 3 6 1 5 END\n4 4 2 14 1 4 END\n18 18 10 11 3 2 END\n2 2 1 13 1 2 END\n2 2 1 14 1 2 END\n2 2 1 14 1 2 END\n2 2 1 11 1 2 END\n4 4 3 3 1 4 END\n12 12 7 11 2 5 END\n6 6 3 11 1 6 END\n3 3 2 3 1 3 END\n"
+    },
+    "max_duration_s": 0.078
+   },
+   {
+    "framing": "literal",
+    "compiled": false,
+    "compile_error": "error[E0599]: no method named `read_line` found for enum `Result<T, E>` in the current scope\n  --> C:\\Users\\elmou\\AppData\\Local\\Temp\\cbox_rs_ym8zquky\\main.rs:18:31\n   |\n18 |         lines.next().unwrap().read_line(&mut line).unwrap();\n   |                               ^^^^^^^^^ method not found in `Result<String, std::io::Error>`\n\nerror[E0599]: no method named `read_line` found for enum `Result<T, E>` in the current scope\n  --> C:\\Users\\elmou\\AppData\\Local\\Temp\\cbox_rs_ym8zquky\\main.rs:33:31\n   |\n33 |         lines.next().unwrap().read_line(&mut line).unwrap();\n   |                               ^^^^^^^^^ method not found in `Result<String, std::io::Error>`\n\nerror[E0599]: no method named `read_line` found for enum `Result<T, E>` in the current scope\n  --> C:\\Users\\elmou\\AppData\\Local\\Temp\\cbox_rs_ym8zquky\\main.rs:50:31\n   |\n50 |         lines.next().unwrap().read_line(&mut line).unwrap();\n   |                               ^^^^^^^^^ method not found in `Result<String, std::io::Error>`\n\nerror: aborting due to 3 previous errors\n\nFor more information about this error, try `rustc --explain E0599`.",
+    "agree": 0,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "",
+    "gates": {
+     "compile": false,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.0
+   }
+  ]
+ },
+ "final_candidate": "restate",
+ "output_path": "runs/bench\\solutions\\1c182498c9c7.rs",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 175.86,
+  "remaining_s": 124.14,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 166.219
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 9.594
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1104.956,
+  "prompt_chars_total": 36009,
+  "output_chars_total": 32341,
+  "detail": [
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 48.73500000004424,
+    "prompt_chars": 3599,
+    "output_chars": 3831,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 74.51600000000326,
+    "prompt_chars": 3225,
+    "output_chars": 3272,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 80.51600000000326,
+    "prompt_chars": 3281,
+    "output_chars": 2878,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 101.5,
+    "prompt_chars": 3233,
+    "output_chars": 1967,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 105.09400000004098,
+    "prompt_chars": 3154,
+    "output_chars": 3458,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 121.89100000000326,
+    "prompt_chars": 3132,
+    "output_chars": 4185,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 130.625,
+    "prompt_chars": 4797,
+    "output_chars": 3426,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 133.81300000002375,
+    "prompt_chars": 3065,
+    "output_chars": 3255,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 142.0470000000205,
+    "prompt_chars": 2832,
+    "output_chars": 2917,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "1c182498",
+    "ok": true,
+    "latency_s": 166.21900000004098,
+    "prompt_chars": 5691,
+    "output_chars": 3152,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}

@@ -1,0 +1,391 @@
+{
+ "problem_id": "5cb294c18288f6ea4e50d59fd9831610232b6df28cc1a84b7d23e3d1eb5c7bb1",
+ "language": "python",
+ "entrypoint": "validate_build",
+ "started_at": "2026-09-14T03:16:07",
+ "status": "verified_against_reference",
+ "gates": {
+  "compile": true,
+  "no_crash": true,
+  "agrees_with_oracle": true,
+  "overflow_checked": null
+ },
+ "events": [
+  {
+   "t": 182.61,
+   "event": "analyse",
+   "traps": 6
+  },
+  {
+   "t": 182.61,
+   "event": "wave",
+   "candidates": 7,
+   "oracle": true
+  }
+ ],
+ "analysis": {
+  "problem_id": "5cb294c18288f6ea4e50d59fd9831610232b6df28cc1a84b7d23e3d1eb5c7bb1",
+  "language": "python",
+  "entrypoint": "validate_build",
+  "summary": "Validates build operations on schema-backed records and arrays with flattened layouts",
+  "traps": [
+   {
+    "kind": "COMPLEXITY",
+    "quote": "Schema-reference and descriptor nesting are at most 60. Repetitions between 1 and 10^18",
+    "consequence": "Naive recursive schema flattening causes exponential expansion; OOMs on moderately complex inputs",
+    "guard": "Compute flattened field counts and positions algebraically without materializing full layouts"
+   },
+   {
+    "kind": "INDEXING",
+    "quote": "Return the 1-based index of the earliest invalid operation",
+    "consequence": "Uses 0-based indexing internally throughout; returns operation index off by one",
+    "guard": "Track operation numbers as 1-based from start or add 1 at return; preserve 0 and len(operations)+1 exactly"
+   },
+   {
+    "kind": "MAGNITUDE",
+    "quote": "Repetitions, capacities, and default counts are between 1 and 10^18",
+    "consequence": "Attempts to iterate through or allocate for 10^18 elements; catastrophic time and memory blowup",
+    "guard": "Track counts and positions algebraically; skip large ranges without iteration or allocation"
+   },
+   {
+    "kind": "REDEFINITION",
+    "quote": "Descriptor equality is recursive and includes schema indices and capacities",
+    "consequence": "Accepts partial descriptor matches; ignores schema index or capacity differences in nested descriptors",
+    "guard": "Recursively compare all descriptor components: element type, schema index, capacity, and further nesting"
+   },
+   {
+    "kind": "RANGES",
+    "quote": "An array may be closed at any length. A record may be closed only when all flattened fields are filled",
+    "consequence": "Applies identical closure logic to both; rejects valid partial array closures or accepts incomplete record closures",
+    "guard": "Distinguish container type; arrays close unconditionally; records close only when all flattened fields filled"
+   },
+   {
+    "kind": "MEMORY",
+    "quote": "Flattened layouts may be enormous",
+    "consequence": "Attempts to construct or store full flattened layout for large schemas; exceeds available memory",
+    "guard": "Represent state as stack of open containers with current position; compute field offsets on demand"
+   }
+  ],
+  "input_shape": "schemas (layout terms), root (schema index), operations (commands); up to 200k schemas/operations, 300k layout nodes",
+  "output_shape": "Integer: 1-based index of first invalid operation, or 0 if all valid and closed, or len(operations)+1 if unclosed",
+  "invariants": [
+   "Flattened record layouts can have 10^18 fields; cannot be materialized in memory",
+   "Nested repeats with 60 levels of nesting require algebraic position computation",
+   "Return value is 1-based index for errors, with special cases 0 and len(operations)+1"
+  ],
+  "max_scale": "200k schemas, 200k operations, 60 nesting depth, 10^18 repetitions and capacities"
+ },
+ "verification": {
+  "cases": 18,
+  "oracle_ok": true,
+  "oracle_error": null,
+  "clusters": {
+   "==============!===": [
+    "adversarial",
+    "literal",
+    "plain"
+   ],
+   "==================": [
+    "traps",
+    "restate",
+    "complexity"
+   ],
+   "==============!=!=": [
+    "edgefirst"
+   ]
+  },
+  "framing_divergence": true,
+  "ambiguity_note": "Candidates written from different readings of the statement do not agree: {adversarial, literal, plain} | {complexity, restate, traps} | {edgefirst}. Divergence across framings points at an ambiguity in the statement rather than at a typo, so the clause involved was re-read rather than resolved by majority.",
+  "notes": [],
+  "candidates": [
+   {
+    "framing": "restate",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "traps",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "complexity",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 18,
+    "disagree": 0,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==================",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": true,
+     "overflow_checked": null
+    },
+    "first_disagreement": null,
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "literal",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==============!===",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "medium#7814",
+     "input": "[[[[\"field\", \"items\", [\"array\", \"int\", 3]], [\"field\", \"name\", \"text\"]]], 0, [[\"open\", \"items\", [\"array\", \"int\", 3]], [\"put\", null, \"int\"], [\"put\", null, \"int\"], [\"close\"], [\"put\", \"name\", \"text\"], [\"close\"]]]",
+     "oracle": "0",
+     "candidate": "2"
+    },
+    "max_duration_s": 0.11
+   },
+   {
+    "framing": "adversarial",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==============!===",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "medium#7814",
+     "input": "[[[[\"field\", \"items\", [\"array\", \"int\", 3]], [\"field\", \"name\", \"text\"]]], 0, [[\"open\", \"items\", [\"array\", \"int\", 3]], [\"put\", null, \"int\"], [\"put\", null, \"int\"], [\"close\"], [\"put\", \"name\", \"text\"], [\"close\"]]]",
+     "oracle": "0",
+     "candidate": "2"
+    },
+    "max_duration_s": 0.125
+   },
+   {
+    "framing": "plain",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 17,
+    "disagree": 1,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==============!===",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "medium#7814",
+     "input": "[[[[\"field\", \"items\", [\"array\", \"int\", 3]], [\"field\", \"name\", \"text\"]]], 0, [[\"open\", \"items\", [\"array\", \"int\", 3]], [\"put\", null, \"int\"], [\"put\", null, \"int\"], [\"close\"], [\"put\", \"name\", \"text\"], [\"close\"]]]",
+     "oracle": "0",
+     "candidate": "2"
+    },
+    "max_duration_s": 0.14
+   },
+   {
+    "framing": "edgefirst",
+    "compiled": true,
+    "compile_error": null,
+    "agree": 16,
+    "disagree": 2,
+    "crashed": 0,
+    "timed_out": 0,
+    "behaviour": "==============!=!=",
+    "gates": {
+     "compile": true,
+     "no_crash": true,
+     "agrees_with_oracle": false,
+     "overflow_checked": null
+    },
+    "first_disagreement": {
+     "case": "medium#7814",
+     "input": "[[[[\"field\", \"items\", [\"array\", \"int\", 3]], [\"field\", \"name\", \"text\"]]], 0, [[\"open\", \"items\", [\"array\", \"int\", 3]], [\"put\", null, \"int\"], [\"put\", null, \"int\"], [\"close\"], [\"put\", \"name\", \"text\"], [\"close\"]]]",
+     "oracle": "0",
+     "candidate": "1"
+    },
+    "max_duration_s": 0.11
+   }
+  ]
+ },
+ "final_candidate": "restate",
+ "output_path": "runs/bench\\solutions\\5cb294c18288.py",
+ "budget": {
+  "deadline_s": 300.0,
+  "scale": 1.0,
+  "total_s": 300.0,
+  "elapsed_s": 199.407,
+  "remaining_s": 100.593,
+  "emit_reserve_s": 20.0,
+  "phases": {
+   "analyse": {
+    "allocated_s": 19.6,
+    "elapsed_s": 0.0
+   },
+   "generate": {
+    "allocated_s": 75.6,
+    "elapsed_s": 182.578
+   },
+   "verify": {
+    "allocated_s": 134.4,
+    "elapsed_s": 16.797
+   },
+   "adjudicate": {
+    "allocated_s": 50.4,
+    "elapsed_s": 0.0
+   },
+   "emit": {
+    "allocated_s": 0.0,
+    "elapsed_s": 0.0
+   }
+  }
+ },
+ "model_usage": {
+  "provider": "claude-cli",
+  "calls": 10,
+  "failed": 0,
+  "latency_s_total": 1174.012,
+  "prompt_chars_total": 37457,
+  "output_chars_total": 55620,
+  "detail": [
+   {
+    "role": "inputgen",
+    "tag": "generator",
+    "ok": true,
+    "latency_s": 72.21799999999348,
+    "prompt_chars": 3789,
+    "output_chars": 3036,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "analyse",
+    "tag": "5cb294c1",
+    "ok": true,
+    "latency_s": 75.35899999999674,
+    "prompt_chars": 5952,
+    "output_chars": 3010,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "restate",
+    "ok": true,
+    "latency_s": 88.90600000001723,
+    "prompt_chars": 3185,
+    "output_chars": 5439,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "literal",
+    "ok": true,
+    "latency_s": 93.31199999997625,
+    "prompt_chars": 3345,
+    "output_chars": 4553,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "edgefirst",
+    "ok": true,
+    "latency_s": 96.45299999997951,
+    "prompt_chars": 3274,
+    "output_chars": 5046,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "adversarial",
+    "ok": true,
+    "latency_s": 99.60899999999674,
+    "prompt_chars": 3401,
+    "output_chars": 5796,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "complexity",
+    "ok": true,
+    "latency_s": 129.81199999997625,
+    "prompt_chars": 3252,
+    "output_chars": 8536,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "oracle",
+    "tag": "literal-reference",
+    "ok": true,
+    "latency_s": 163.43699999997625,
+    "prompt_chars": 3390,
+    "output_chars": 7378,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "traps",
+    "ok": true,
+    "latency_s": 172.3279999999795,
+    "prompt_chars": 4917,
+    "output_chars": 6653,
+    "error": null,
+    "model": "haiku"
+   },
+   {
+    "role": "candidate",
+    "tag": "plain",
+    "ok": true,
+    "latency_s": 182.5779999999795,
+    "prompt_chars": 2952,
+    "output_chars": 6173,
+    "error": null,
+    "model": "haiku"
+   }
+  ]
+ }
+}
